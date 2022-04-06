@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const compression = require("compression");
 const cors = require("cors");
-
+const sequelize = require("./utils/dbconnection");
 // Start express app
 const app = express();
 
@@ -34,6 +34,16 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 
 app.use(compression());
+
+// database connection testing (TO REMOVE)
+(async function () {
+  try {
+    await sequelize.authenticate();
+    console.log("Connection has been established successfully.");
+  } catch (error) {
+    console.error("Unable to connect to the database:", error);
+  }
+})();
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
