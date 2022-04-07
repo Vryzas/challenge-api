@@ -8,6 +8,7 @@ const cors = require('cors');
 const sequelize = require('./utils/dbconnection');
 
 const userRouter = require('./routes/userRoutes');
+const statsRouter = require('./routes/userStatsRoutes');
 // Start express app
 const app = express();
 
@@ -48,6 +49,7 @@ app.use(compression());
 })();
 
 app.use('/', userRouter);
+app.use('/stats', statsRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
