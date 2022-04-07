@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const cors = require('cors');
 const sequelize = require('./utils/dbconnection');
+
+const userRouter = require('./routes/userRoutes');
 // Start express app
 const app = express();
 
@@ -44,6 +46,8 @@ app.use(compression());
     console.error('Unable to connect to the database:', error);
   }
 })();
+
+app.use('/', userRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
