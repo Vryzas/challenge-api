@@ -10,6 +10,7 @@ const sequelize = require('./utils/dbconnection');
 const userRouter = require('./routes/userRoutes');
 const statsRouter = require('./routes/userStatsRoutes');
 const matchesRouter = require('./routes/matchRoutes');
+const chessRouter = require('./routes/chessRoutes');
 // Start express app
 const app = express();
 
@@ -52,6 +53,7 @@ app.use(compression());
 app.use('/', userRouter);
 app.use('/stats', statsRouter);
 app.use('/matches', matchesRouter);
+app.use('/chess', chessRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
