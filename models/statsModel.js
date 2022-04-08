@@ -1,16 +1,10 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('../utils/dbconnection');
-const User = require('./userModel');
 
 class Stat extends Model {}
 
 Stat.init(
   {
-    // id: {
-    //   type: DataTypes.INTEGER,
-    //   autoIncrement: true,
-    //   primaryKey: true,
-    // },
     username: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -19,17 +13,17 @@ Stat.init(
     victories: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      default: 0,
+      defaultValue: 0,
     },
     defeats: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      default: 0,
+      defaultValue: 0,
     },
     draws: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      default: 0,
+      defaultValue: 0,
     },
   },
   {
