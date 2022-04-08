@@ -1,5 +1,5 @@
 {
-  "name": "challengeapi",
+  "name": "challenge-api",
   "version": "1.0.0",
   "description": "Internship project API",
   "main": "app.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Vryzas/challengeapi.git"
+    "url": "git+https://github.com/Vryzas/challenge-api.git"
   },
   "keywords": [
     "node",
@@ -21,9 +21,9 @@
   "author": "Vitor Costa",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Vryzas/challengeapi/issues"
+    "url": "https://github.com/Vryzas/challenge-api/issues"
   },
-  "homepage": "https://github.com/Vryzas/challengeapi#readme",
+  "homepage": "https://github.com/Vryzas/challenge-api#readme",
   "dependencies": {
     "body-parser": "^1.20.0",
     "compression": "^1.7.4",
