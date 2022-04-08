@@ -50,6 +50,6 @@ All info and instructions in https://nodejs.org/en/.
 
 #### Database contains 3 tables:
 
-- Users(<ins>id</ins>, username, email, password)
-- Userstats(<ins>id</ins>, user->Users, victories, defeats, draws)
-- Matches(<ins>id</ins>, player1->Users, player2->Users, score1, score2, winner)
+- Users(<ins>username</ins>, email, password)
+- Stats(<ins>username</ins>, victories, defeats, draws)
+- Matches(<ins>id</ins>, username1->Users, username2->Users, score1, score2, createdAt)
