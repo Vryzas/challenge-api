@@ -8,15 +8,16 @@ exports.signup = async (req, res, next) => {
       email: req.body.email,
       password: req.body.password,
     });
+    const url = `${req.protocol}://${req.get('host')}/activateMe/${newUser.username}`;
     await sendEmail({
       email: newUser.email,
       subject: 'Your profile has been created',
       message: `Please click the link to activate your account. 
-      If you haven't created a profile please ignore this message.`,
+      If you haven't created a profile please ignore this message.
+      \n${url}`,
     });
     return res.status(201).json({
-      message:
-        'Your profile has been created, please check your email for the activation message.',
+      message: 'Your profile has been created, please check your email for the activation message.',
     });
   } catch (err) {
     return res.status(500).json({ message: 'Something went wrong!' });
@@ -27,9 +28,7 @@ exports.login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
-      return res
-        .status(400)
-        .json({ message: 'Please provide username and password!' });
+      return res.status(400).json({ message: 'Please provide username and password!' });
     }
 
     const user = await User.findByPk(username);
