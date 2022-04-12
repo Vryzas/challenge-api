@@ -1,5 +1,5 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = require('./../utils/dbconnection');
+const { Sequelize, DataTypes, Model } = require("sequelize");
+const sequelize = require("./../utils/dbconnection");
 
 class User extends Model {}
 
@@ -21,14 +21,19 @@ User.init(
       isEmail: true,
       allowNull: false,
     },
+    active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    passwordResetToken: DataTypes.STRING,
+    passwordResetExpires: DataTypes.DATE,
   },
   {
     sequelize,
-    modelName: 'User',
+    modelName: "User",
     timestamps: false,
   }
 );
 
 User.sync({ alter: true });
-console.log(User === sequelize.models.User);
 module.exports = User;
