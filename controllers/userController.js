@@ -94,3 +94,26 @@ exports.resetPassword = async function (req, res, next) {
     return res.status(501).json({ message: 'Something went wrong!' });
   }
 };
+
+exports.passwordRedefined = async (req, res, next) => {
+  const user = await User.findByPk(req.params.username);
+  try {
+    if (!user.passwordResetToken || !user.passwordResetExpires) {
+      return res.status(403).json({
+        message: `You don't have a password reset request!`,
+      });
+    }
+    user.password = req.body.newPassword;
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+    if (user.save()) {
+      return res.status(200).json({
+        message: `${req.params.username}, your password has been redefined successfully.`,
+      });
+    }
+  } catch (err) {
+    return res.status(501).json({
+      message: `Something went wrong! \nYour password hasn't changed!`,
+    });
+  }
+};
