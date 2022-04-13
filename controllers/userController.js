@@ -76,3 +76,21 @@ exports.forgotPassword = async (req, res, next) => {
     return res.status(500).json({ message: 'Something went wrong!' });
   }
 };
+
+exports.resetPassword = async function (req, res, next) {
+  const user = await User.findOne({ passwordResetToken: req.params.token });
+  try {
+    if (user && new Date(+Date.now()) < +user.passwordResetExpires) {
+      return res.status(302).json({
+        message: 'Please insert a new password in the highlighted field',
+      });
+    }
+    if (!user || new Date(+Date.now()) > +user.passwordResetExpires) {
+      return res
+        .status(403)
+        .json({ message: 'Your password reset link has expired!' });
+    }
+  } catch (err) {
+    return res.status(501).json({ message: 'Something went wrong!' });
+  }
+};
