@@ -4,6 +4,18 @@ const socketIO = require('socket.io');
 const server = http.createServer(app);
 const io = socketIO(server);
 
+const User = require('././/models/userModel');
+
+io.use(async (socket, next) => {
+  const user = await User.findByPk(socket.handshake.headers.user);
+  console.log;
+  if (user === null || !user.logedIn) {
+    next(new Error('invalid'));
+  } else {
+    next();
+  }
+});
+
 io.on('connection', (socket) => {
   console.log(
     'Socket connection established!',
