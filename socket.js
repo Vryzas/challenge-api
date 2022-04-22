@@ -22,6 +22,18 @@ io.on('connection', (socket) => {
   const user = socket.handshake.headers.user;
   socket.broadcast.emit('onConnect', `${user} is online!`);
 
+  socket.on('challenge', (args) => {
+    if (usersOnline.some((user) => user.includes(args.to))) {
+      const sender = usersOnline.find((user) => user.includes(args.to));
+      sender[1].emit(
+        `${sender[0]}`,
+        `${args.from} is challenging you: \n${args.text}`
+      );
+    } else {
+      socket.emit(`Error`, `${args.to} appears to be offline or unavailable!`);
+    }
+  });
+
   socket.on('disconnect', (socket) => {
     console.log(`${user} has disconnected!`);
     io.emit('onDisconnect', `${user} disconnected!`);
@@ -31,8 +43,6 @@ io.on('connection', (socket) => {
 });
 
 // TODO:
-// Send Challenge Request to another User
-// Answer with an error if User challenged is not available
 // Answer with Request response when other User handles Request
 // Send Error to other User on disconnect
 // Send Challenge Response
