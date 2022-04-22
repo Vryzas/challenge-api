@@ -34,6 +34,18 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on(`response`, (args) => {
+    if (usersOnline.some((user) => user.includes(args.to))) {
+      const sender = usersOnline.find((user) => user.includes(args.to));
+      sender[1].emit(
+        `${sender[0]}`,
+        `${args.from} is answering to your challenge: \n${args.text}`
+      );
+    } else {
+      socket.emit(`Error`, `${args.to} is no longer online or is unavailable!`);
+    }
+  });
+
   socket.on('disconnect', (socket) => {
     console.log(`${user} has disconnected!`);
     io.emit('onDisconnect', `${user} disconnected!`);
@@ -41,12 +53,5 @@ io.on('connection', (socket) => {
     usersOnline.forEach((val) => console.log(val[0]));
   });
 });
-
-// TODO:
-// Answer with Request response when other User handles Request
-// Send Error to other User on disconnect
-// Send Challenge Response
-// Allow a positive or negative response to request
-// Answer with an error if User that sent Challenge Request is not available
 
 module.exports = server;
