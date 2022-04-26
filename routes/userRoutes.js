@@ -9,8 +9,8 @@ router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 router.get('/logout', authController.logout);
 
-router.get('/getMe', userController.getMe);
-router.get('/getMyStats', userController.getMyStats);
-router.get('/getMyMatches', userController.getMyMatches);
+router.get('/profile', userController.profile);
+router.get('/stats', userController.stats);
+router.get('/matches', userController.matches);
 
 module.exports = router;
