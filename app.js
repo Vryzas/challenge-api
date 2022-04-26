@@ -5,12 +5,13 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const cors = require('cors');
-const sequelize = require('./utils/dbconnection');
 
+const sequelize = require('./utils/dbconnection');
 const userRouter = require('./routes/userRoutes');
 const statsRouter = require('./routes/userStatsRoutes');
 const matchesRouter = require('./routes/matchRoutes');
 const chessRouter = require('./routes/chessRoutes');
+
 // Start express app
 const app = express();
 
