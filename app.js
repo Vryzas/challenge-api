@@ -51,7 +51,7 @@ app.use(compression());
   }
 })();
 
-app.use('/', userRouter);
+app.use('/user', userRouter);
 app.use('/stats', statsRouter);
 app.use('/matches', matchesRouter);
 app.use('/chess', chessRouter);
