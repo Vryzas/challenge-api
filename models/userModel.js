@@ -27,5 +27,4 @@ User.init(
 );
 
 User.sync({ alter: true });
-console.log(User === sequelize.models.User);
 module.exports = User;

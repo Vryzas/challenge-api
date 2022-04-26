@@ -34,5 +34,4 @@ Stat.init(
 );
 
 Stat.sync({ alter: true });
-console.log(Stat === sequelize.models.Stat);
 module.exports = Stat;
