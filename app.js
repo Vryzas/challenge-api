@@ -8,7 +8,7 @@ const cors = require('cors');
 
 const sequelize = require('./utils/dbconnection');
 const userRouter = require('./routes/userRoutes');
-const statsRouter = require('./routes/userStatsRoutes');
+const statsRouter = require('./routes/statsRoutes');
 const matchesRouter = require('./routes/matchRoutes');
 const chessRouter = require('./routes/chessRoutes');
 
