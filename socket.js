@@ -26,7 +26,7 @@ io.on('connection', (socket) => {
     if (usersOnline.some((user) => user.includes(args.to))) {
       const sender = usersOnline.find((user) => user.includes(args.to));
       sender[1].emit(
-        `${sender[0]}`,
+        `onChallenge`,
         `${args.from} is challenging you: \n${args.text}`
       );
     } else {
@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
     if (usersOnline.some((user) => user.includes(args.to))) {
       const sender = usersOnline.find((user) => user.includes(args.to));
       sender[1].emit(
-        `${sender[0]}`,
+        `onResponse`,
         `${args.from} is answering to your challenge: \n${args.text}`
       );
     } else {
