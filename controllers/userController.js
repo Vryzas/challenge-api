@@ -1,12 +1,9 @@
 const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
-const axios = require('axios');
 
 exports.getMe = async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my data is still to be impemented.' });
+  return res.status(501).json({ message: 'Get my data is still to be impemented.' });
 };
 
 exports.getMyStats = async function (req, res, next) {
@@ -22,12 +19,14 @@ exports.getMyMatches = async function (req, res, next) {
 };
 
 exports.activate = async (req, res, next) => {
-  // check if user exists and is already activated
   const user = await User.findByPk(req.params.username);
-  if (!user || user.active) {
+  if (!user) {
     return res
-      .status(400)
-      .json({ message: 'Wrong username or user is already activated!' });
+      .status(404)
+      .json({ message: 'No registered user with that username!' });
+  }
+  if (user.active) {
+    return res.status(400).json({ message: 'User is already activated!' });
   }
   try {
     user.active = true;
@@ -45,7 +44,7 @@ exports.activate = async (req, res, next) => {
 
 exports.forgotPassword = async (req, res, next) => {
   const email = req.body.email;
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ where: { email: email } });
   if (!user || !user.active) {
     return res
       .status(404)
@@ -64,10 +63,10 @@ exports.forgotPassword = async (req, res, next) => {
         message: `To reset your password, please click the link within the next 10 minutes.
         \n${url}`,
       });
-      return res.status(200).json({
-        message:
-          'Email has been sent. Check your inbox for password recovery instructions.',
-      });
+      return res
+        .status(200)
+        .json({
+          message: 'Email has been sent. Check your inbox for password recovery instructions.' });
     }
   } catch (err) {
     user.passwordResetToken = undefined;
@@ -78,7 +77,9 @@ exports.forgotPassword = async (req, res, next) => {
 };
 
 exports.resetPassword = async function (req, res, next) {
-  const user = await User.findOne({ passwordResetToken: req.params.token });
+  const user = await User.findOne({
+    where: { passwordResetToken: req.params.token },
+  });
   try {
     if (user && new Date(+Date.now()) < +user.passwordResetExpires) {
       return res.status(302).json({
