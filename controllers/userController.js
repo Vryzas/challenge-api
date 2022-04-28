@@ -21,7 +21,7 @@ exports.getMyMatches = async function (req, res, next) {
     .json({ message: 'Get my matches is still to be impemented.' });
 };
 
-exports.activateAccount = async (req, res, next) => {
+exports.activate = async (req, res, next) => {
   // check if user exists and is already activated
   const user = await User.findByPk(req.params.username);
   if (!user || user.active) {
@@ -95,7 +95,7 @@ exports.resetPassword = async function (req, res, next) {
   }
 };
 
-exports.passwordRedefined = async (req, res, next) => {
+exports.changePassword = async (req, res, next) => {
   const user = await User.findByPk(req.params.username);
   try {
     if (!user.passwordResetToken || !user.passwordResetExpires) {
