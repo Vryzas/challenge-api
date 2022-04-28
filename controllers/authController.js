@@ -32,10 +32,12 @@ exports.login = async (req, res, next) => {
     }
 
     const user = await User.findByPk(username);
-    if (!user || password !== user.password) {
-      return res.status(401).json({ message: 'Wrong username or password!' });
+    if (!user) {
+      return res.status(401).json({ message: 'Wrong username!' });
     }
-
+    if (password !== user.password) {
+      return res.status(401).json({ message: 'Wrong password!' });
+    }
     return res.status(200).json({
       message: 'Login successful.',
       data: { username: user.username, email: user.email },
