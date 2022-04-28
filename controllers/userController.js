@@ -2,6 +2,32 @@ const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
 
+exports.activeUser = async (req, res, next) => {
+  let user;
+  if(req.params.username || req.body.username) {
+    user = await User.findByPk(req.params.username || req.body.username);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: 'No registered user with that username!' });
+    }
+  }
+  if(req.body.email){
+    user = await User.findOne({ where: { email: req.body.email } });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: 'No registered user with that email!' });
+    }
+  }
+  if(!user.active){
+    return res
+        .status(401)
+        .json({ message: `This account hasn't been activated yet!` });
+  }
+  next();
+}
+
 exports.getMe = async function (req, res, next) {
   return res.status(501).json({ message: 'Get my data is still to be impemented.' });
 };
@@ -20,11 +46,6 @@ exports.getMyMatches = async function (req, res, next) {
 
 exports.activate = async (req, res, next) => {
   const user = await User.findByPk(req.params.username);
-  if (!user) {
-    return res
-      .status(404)
-      .json({ message: 'No registered user with that username!' });
-  }
   if (user.active) {
     return res.status(400).json({ message: 'User is already activated!' });
   }
@@ -43,13 +64,7 @@ exports.activate = async (req, res, next) => {
 };
 
 exports.forgotPassword = async (req, res, next) => {
-  const email = req.body.email;
-  const user = await User.findOne({ where: { email: email } });
-  if (!user || !user.active) {
-    return res
-      .status(404)
-      .json({ message: 'No user with that email or user is not active!' });
-  }
+  const user = await User.findOne({ where: { email: req.body.email } });
   try {
     const key = user.username;
     const token = jwt.sign({ key }, process.env.JWT_SECRET);
