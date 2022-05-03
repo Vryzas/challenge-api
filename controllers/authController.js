@@ -1,5 +1,7 @@
 const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
+const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
 
 exports.signup = async (req, res, next) => {
   try {
