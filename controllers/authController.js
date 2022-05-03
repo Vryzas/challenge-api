@@ -4,10 +4,14 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
 exports.signup = catchAsync(async (req, res, next) => {
+  let { username, email, password } = req.body;
+  if (!username || !email || !password) {
+    (username = null), (email = null), (password = null);
+  }
   const newUser = await User.create({
-    username: req.body.username,
-    email: req.body.email,
-    password: req.body.password,
+    username: username,
+    email: email,
+    password: password,
   });
   const url = `${req.protocol}://${req.get('host')}/activateMe/${newUser.username}`;
   await sendEmail({
