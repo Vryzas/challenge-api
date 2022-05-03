@@ -33,11 +33,11 @@ exports.login = async (req, res, next) => {
   }
 
   const user = await User.findByPk(username);
-  if (!user || password !== user.password) {
-    return res.status(401).json({ message: 'Wrong username or password!' });
+  if (!user) {
+    return next(new AppError(`Wrong username!`, 400));
   }
-  if (user.loggedIn) {
-    return res.status(400).json({ message: 'User already loged in' });
+  if (password !== user.password) {
+    return next(new AppError(`Wrong password!`, 400));
   }
   user.logedIn = true;
   user.save();
