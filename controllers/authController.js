@@ -50,10 +50,10 @@ exports.login = async (req, res, next) => {
 exports.logout = catchAsync(async function (req, res, next) {
   const user = await User.findByPk(req.params.username);
   if (!user) {
-    return res.status(500).json({ message: 'Something went wrong!' });
+    return next(new AppError('No user with this username!', 400));
   }
   if (!user.logedIn) {
-    return res.status(500).json({ message: `This user isn't logged in!` });
+    return next(new AppError(`This user isn't logged in!`, 400));
   }
   user.logedIn = false;
   user.save();
