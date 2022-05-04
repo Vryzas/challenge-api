@@ -1,6 +1,7 @@
+const catchAsync = require('./../utils/catchAsync');
 const axios = require('axios');
 
-exports.chessPlayer = async (req, res, next) => {
+exports.chessPlayer = catchAsync(async (req, res, next) => {
   const player = req.body.player;
   const url = `https://api.chess.com/pub/player/${player}/stats`;
   let status;
@@ -9,18 +10,18 @@ exports.chessPlayer = async (req, res, next) => {
     .get(url)
     .then((response) => {
       status = response.status;
-      message = response.data.fide;
+      message = response.data.fide || 'No data about that player found!';
     })
     .catch((error) => {
-      status = 500;
-      console.log(error);
+      status = error.response.status;
+      message = error.response.data.message || 'No player with that id found!';
     });
-  return await res.status(500).json({
+  return await res.status(status).json({
     message: message,
   });
-};
+});
 
-exports.chessMatchesByPlayer = async (req, res, next) => {
+exports.chessMatchesByPlayer = catchAsync(async (req, res, next) => {
   const player = req.body.player;
   const url = `https://api.chess.com/pub/player/${player}/games/2022/04`;
   let status;
@@ -30,14 +31,14 @@ exports.chessMatchesByPlayer = async (req, res, next) => {
     .then((response) => {
       status = response.status;
       message = {
-        games: response.data.games,
+        games: response.data.games.length || 'No games from that player found!',
       };
     })
     .catch((error) => {
-      status = 500;
-      console.log(error);
+      status = error.response.status;
+      message = error.response.data.message || 'No player with that id found!';
     });
   return await res.status(status).json({
-    message: message.games.length,
+    message: message,
   });
-};
+});
