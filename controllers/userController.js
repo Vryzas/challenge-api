@@ -42,10 +42,11 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const email = req.body.email;
   const user = await User.findOne({ email: email });
-  if (!user || !user.active) {
-    return res
-      .status(404)
-      .json({ message: 'No user with that email or user is not active!' });
+  if (!user) {
+    return next(new AppError('No user with that email!', 401));
+  }
+  if (!user.active) {
+    return next(new AppError('Your profile is not activated!', 400));
   }
   const key = user.username;
   const token = jwt.sign({ key }, process.env.JWT_SECRET);
