@@ -76,9 +76,7 @@ exports.resetPassword = catchAsync(async function (req, res, next) {
     });
   }
   if (!user || new Date(+Date.now()) > +user.passwordResetExpires) {
-    return res
-      .status(403)
-      .json({ message: 'Your password reset link has expired!' });
+    return next(new AppError('Your password reset link has expired!', 403));
   }
 });
 
