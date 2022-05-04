@@ -83,9 +83,7 @@ exports.resetPassword = catchAsync(async function (req, res, next) {
 exports.passwordRedefined = catchAsync(async (req, res, next) => {
   const user = await User.findByPk(req.params.username);
   if (!user.passwordResetToken || !user.passwordResetExpires) {
-    return res.status(403).json({
-      message: `You don't have a password reset request!`,
-    });
+    return next(new AppError(`You don't have a password reset request!`, 403));
   }
   user.password = req.body.newPassword;
   user.passwordResetToken = null;
