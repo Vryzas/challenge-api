@@ -24,12 +24,12 @@ exports.getMyMatches = catchAsync(async function (req, res, next) {
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
-  // check if user exists and is already activated
   const user = await User.findByPk(req.params.username);
-  if (!user || user.active) {
-    return next(
-      new AppError('Wrong username or user is already activated!', 400)
-    );
+  if (!user) {
+    return next(new AppError('Wrong username!', 401));
+  }
+  if (user.active) {
+    return next(new AppError('User is already activated!', 400));
   }
   user.active = true;
   if (await user.save()) {
