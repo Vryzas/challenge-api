@@ -1,4 +1,5 @@
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
 const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
@@ -26,9 +27,9 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
   // check if user exists and is already activated
   const user = await User.findByPk(req.params.username);
   if (!user || user.active) {
-    return res
-      .status(400)
-      .json({ message: 'Wrong username or user is already activated!' });
+    return next(
+      new AppError('Wrong username or user is already activated!', 400)
+    );
   }
   user.active = true;
   if (await user.save()) {
