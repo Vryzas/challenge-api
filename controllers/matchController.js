@@ -1,11 +1,22 @@
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const Match = require('./../models/matchModel');
+const User = require(`./../models/userModel`);
+const { Op } = require('sequelize');
 
 exports.playerMatches = catchAsync(async function (req, res, next) {
-  const player = req.params.username;
-  return res.status(501).json({
-    message: `Find matches for ${player} is still to be impemented.`,
+  const player = await User.findByPk(req.params.username);
+  if (!player) {
+    return next(new AppError(`No player with that username found!`, 400));
+  }
+  const games = await Match.findAll({
+    where: {
+      [Op.or]: [{ username1: req.params.username }, { username2: req.params.username }],
+    },
+  });
+  return res.status(200).json({
+    message: games.length,
+    games: games,
   });
 });
 
