@@ -1,37 +1,29 @@
 const catchAsync = require('./../utils/catchAsync');
-
-exports.winUpdate = catchAsync(async (req, res, next) => {
-  const winner = req.params.username;
-  return res.status(501).json({
-    message: 'Updating user victories is still to be impemented.' + `${winner}`,
-  });
-});
-
-exports.defeatUpdate = catchAsync(async (req, res, next) => {
-  const loser = req.params.username;
-  return res.status(501).json({
-    message: 'Updating user defeats is still to be impemented.' + `${loser}`,
-  });
-});
-
-exports.drawUpdate = catchAsync(async (req, res, next) => {
-  const draw = req.params.username;
-  return res
-    .status(501)
-    .json({ message: 'Updating draws is still to be impemented.' + `${draw}` });
-});
+const Stat = require('./../models/statsModel');
 
 exports.findStats = catchAsync(async (req, res, next) => {
-  const username = req.params.username;
-  return res.status(501).json({
-    message: `Getting the stats of ${username} is still to be impemented.`,
+  const userStats = await Stat.findByPk(req.params.username);
+  if (!userStats) {
+    return res.status(404).json({ message: `No player with that name found!` });
+  }
+  return res.status(200).json({
+    message: userStats,
   });
 });
 
 exports.compareStats = catchAsync(async (req, res, next) => {
-  const toCompare = req.body.toCompare;
-  const compareTo = req.body.compareTo;
-  return res.status(501).json({
-    message: `Comparing stats with between ${toCompare} and ${compareTo}user is still to be impemented.`,
+  const usernames = [
+    req.body.username1,
+    req.body.username2,
+    req.body.username3,
+    req.body.username4,
+  ];
+  const stats = await Stat.findAll({
+    where: {
+      username: usernames,
+    },
+  });
+  return res.status(200).json({
+    message: stats,
   });
 });

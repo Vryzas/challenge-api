@@ -1,6 +1,7 @@
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const User = require('./../models/userModel');
+const Stat = require(`./../models/statsModel`);
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
@@ -9,18 +10,6 @@ exports.getMe = catchAsync(async function (req, res, next) {
   return res
     .status(501)
     .json({ message: 'Get my data is still to be impemented.' });
-});
-
-exports.getMyStats = catchAsync(async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my statistics is still to be impemented.' });
-});
-
-exports.getMyMatches = catchAsync(async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my matches is still to be impemented.' });
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
@@ -33,6 +22,7 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
   }
   user.active = true;
   if (await user.save()) {
+    const newStat = await Stat.create({ username: user.username });
     return res
       .status(200)
       .json({ message: 'Your account has been activated successfully.' });
