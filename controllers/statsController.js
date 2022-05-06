@@ -12,9 +12,18 @@ exports.findStats = catchAsync(async (req, res, next) => {
 });
 
 exports.compareStats = catchAsync(async (req, res, next) => {
-  const toCompare = req.body.toCompare;
-  const compareTo = req.body.compareTo;
-  return res.status(501).json({
-    message: `Comparing stats with between ${toCompare} and ${compareTo}user is still to be impemented.`,
+  const usernames = [
+    req.body.username1,
+    req.body.username2,
+    req.body.username3,
+    req.body.username4,
+  ];
+  const stats = await Stat.findAll({
+    where: {
+      username: usernames,
+    },
+  });
+  return res.status(200).json({
+    message: stats,
   });
 });
