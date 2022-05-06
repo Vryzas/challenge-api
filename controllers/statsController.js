@@ -1,9 +1,13 @@
 const catchAsync = require('./../utils/catchAsync');
+const Stat = require('./../models/statsModel');
 
 exports.findStats = catchAsync(async (req, res, next) => {
-  const username = req.params.username;
-  return res.status(501).json({
-    message: `Getting the stats of ${username} is still to be impemented.`,
+  const userStats = await Stat.findByPk(req.params.username);
+  if (!userStats) {
+    return res.status(404).json({ message: `No player with that name found!` });
+  }
+  return res.status(200).json({
+    message: userStats,
   });
 });
 
