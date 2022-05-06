@@ -11,18 +11,6 @@ exports.getMe = catchAsync(async function (req, res, next) {
     .json({ message: 'Get my data is still to be impemented.' });
 });
 
-exports.getMyStats = catchAsync(async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my statistics is still to be impemented.' });
-});
-
-exports.getMyMatches = catchAsync(async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my matches is still to be impemented.' });
-});
-
 exports.activateAccount = catchAsync(async (req, res, next) => {
   const user = await User.findByPk(req.params.username);
   if (!user) {

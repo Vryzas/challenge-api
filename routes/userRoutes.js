@@ -14,7 +14,5 @@ router.patch('/forgotPassword', userController.forgotPassword);
 router.get('/resetPassword/:token', userController.resetPassword);
 router.patch('/passwordRedefined/:username', userController.passwordRedefined);
 router.get('/getMe', userController.getMe);
-router.get('/getMyStats', userController.getMyStats);
-router.get('/getMyMatches', userController.getMyMatches);
 
 module.exports = router;
