@@ -1,6 +1,7 @@
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const User = require('./../models/userModel');
+const Stat = require(`./../models/statsModel`);
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
@@ -21,6 +22,7 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
   }
   user.active = true;
   if (await user.save()) {
+    const newStat = await Stat.create({ username: user.username });
     return res
       .status(200)
       .json({ message: 'Your account has been activated successfully.' });
