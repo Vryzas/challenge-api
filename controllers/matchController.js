@@ -2,6 +2,7 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const Match = require('./../models/matchModel');
 const User = require(`./../models/userModel`);
+const Stat = require(`./../models/statsModel`);
 const { Op } = require('sequelize');
 const lodash = require('lodash');
 
@@ -68,6 +69,45 @@ exports.addMatch = catchAsync(async function (req, res, next) {
     score1: req.body.score1,
     score2: req.body.score2,
   });
+  if (req.body.score1 === req.body.score2) {
+    await Stat.increment(
+      { draws: 1 },
+      {
+        where: {
+          [Op.or]: [{ username: req.body.username1 }, { username: req.body.username2 }],
+        },
+      }
+    );
+  }
+  if (req.body.score1 > req.body.score2) {
+    await Stat.increment(
+      { victories: 1 },
+      {
+        where: { username: req.body.username1 },
+      }
+    );
+    await Stat.increment(
+      { defeats: 1 },
+      {
+        where: { username: req.body.username2 },
+      }
+    );
+  }
+  if (req.body.score1 < req.body.score2) {
+    await Stat.increment(
+      { victories: 1 },
+      {
+        where: { username: req.body.username2 },
+      }
+    );
+    await Stat.increment(
+      { defeats: 1 },
+      {
+        where: { username: req.body.username1 },
+      }
+    );
+  }
+
   return res.status(201).json({
     message: `Game saved successfully.`,
   });
