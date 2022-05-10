@@ -2,46 +2,16 @@ const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
 
-exports.activeUser = async (req, res, next) => {
-  let user;
-  if(req.params.username || req.body.username) {
-    user = await User.findByPk(req.params.username || req.body.username);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: 'No registered user with that username!' });
-    }
-  }
-  if(req.body.email){
-    user = await User.findOne({ where: { email: req.body.email } });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: 'No registered user with that email!' });
-    }
-  }
-  if(!user.active){
-    return res
-        .status(401)
-        .json({ message: `This account hasn't been activated yet!` });
-  }
-  next();
-}
-
 exports.getMe = async function (req, res, next) {
   return res.status(501).json({ message: 'Get my data is still to be impemented.' });
 };
 
 exports.getMyStats = async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my statistics is still to be impemented.' });
+  return res.status(501).json({ message: 'Get my statistics is still to be impemented.' });
 };
 
 exports.getMyMatches = async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my matches is still to be impemented.' });
+  return res.status(501).json({ message: 'Get my matches is still to be impemented.' });
 };
 
 exports.activate = async (req, res, next) => {
@@ -52,14 +22,10 @@ exports.activate = async (req, res, next) => {
   try {
     user.active = true;
     if (await user.save()) {
-      return res
-        .status(200)
-        .json({ message: 'Your account has been activated successfully.' });
+      return res.status(200).json({ message: 'Your account has been activated successfully.' });
     }
   } catch (err) {
-    return res
-      .status(400)
-      .json({ message: 'Something went wrong with your activation!' });
+    return res.status(400).json({ message: 'Something went wrong with your activation!' });
   }
 };
 
@@ -78,10 +44,9 @@ exports.forgotPassword = async (req, res, next) => {
         message: `To reset your password, please click the link within the next 10 minutes.
         \n${url}`,
       });
-      return res
-        .status(200)
-        .json({
-          message: 'Email has been sent. Check your inbox for password recovery instructions.' });
+      return res.status(200).json({
+        message: 'Email has been sent. Check your inbox for password recovery instructions.',
+      });
     }
   } catch (err) {
     user.passwordResetToken = undefined;
@@ -102,9 +67,7 @@ exports.resetPassword = async function (req, res, next) {
       });
     }
     if (!user || new Date(+Date.now()) > +user.passwordResetExpires) {
-      return res
-        .status(403)
-        .json({ message: 'Your password reset link has expired!' });
+      return res.status(403).json({ message: 'Your password reset link has expired!' });
     }
   } catch (err) {
     return res.status(501).json({ message: 'Something went wrong!' });
