@@ -13,7 +13,7 @@ io.use(async (socket, next) => {
   if (!user) {
     next(new Error(`User doesn't exist!`));
   } else {
-    if (!user.logedIn) {
+    if (!user.loggedIn) {
       next(new Error(`Not logged in!`));
     } else {
       usersOnline.push([user.username, socket]);
