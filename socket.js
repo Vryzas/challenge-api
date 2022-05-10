@@ -10,11 +10,15 @@ let usersOnline = [];
 
 io.use(async (socket, next) => {
   const user = await User.findByPk(socket.handshake.headers.user);
-  if (user === null || !user.logedIn) {
-    next(new Error(`Invalid credentials or not loged in!`));
+  if (!user) {
+    next(new Error(`User doesn't exist!`));
   } else {
-    usersOnline.push([user.username, socket]);
-    next();
+    if (!user.logedIn) {
+      next(new Error(`Not logged in!`));
+    } else {
+      usersOnline.push([user.username, socket]);
+      next();
+    }
   }
 });
 
