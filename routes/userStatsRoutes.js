@@ -4,7 +4,7 @@ const statsController = require('./../controllers/statsController');
 
 const router = express.Router();
 
-router.get('/findStats/:username', statsController.findStats);
-router.get('/compareStats', statsController.compareStats);
+router.get('/player/:username?', statsController.findStats);
+router.get('/compare', statsController.compareStats);
 
 module.exports = router;
