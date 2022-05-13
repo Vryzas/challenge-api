@@ -58,15 +58,18 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async function (req, res, next) {
-  const user = await User.findOne({ passwordResetToken: req.params.token });
+  const user = await User.findOne({
+    where: { passwordResetToken: req.params.token },
+  });
+  if (!user || new Date(+Date.now()) > +user.passwordResetExpires) {
+    console.log(user);
+    return next(new AppError('Your password reset link has expired!', 403));
+  }
 
   if (user && new Date(+Date.now()) < +user.passwordResetExpires) {
     return res.status(302).json({
       message: 'Please insert a new password in the highlighted field',
     });
-  }
-  if (!user || new Date(+Date.now()) > +user.passwordResetExpires) {
-    return next(new AppError('Your password reset link has expired!', 403));
   }
 });
 
