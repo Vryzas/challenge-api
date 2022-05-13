@@ -1,0 +1,784 @@
+---
+openapi: 3.0.1
+info:
+  title: Challenge API
+  description: API to manage player profiles (data, match information and statistics) and search to chess.com API
+  version: "0.2"
+servers:
+- url: https://virtserver.swaggerhub.com/VitorCosta/Challenge-API/0.2
+- url: https://challengeapi-1.herokuapp.com
+paths:
+  /stats/player/{username}:
+    get:
+      tags:
+      - stats
+      summary: find a given user statistics
+      description: Returns the user statistics (victories, draws, defeats) for the 'username'
+      operationId: findStats
+      parameters:
+      - name: username
+        in: path
+        description: ID of user stats to return
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stat'
+        "404":
+          description: No player with that name found!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "400":
+          description: No player name given!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+  /stats/compare:
+    get:
+      tags:
+      - stats
+      summary: Compare stats between 2 and up to 4 players
+      description: Send 2 to 4 usernames in the request body
+      operationId: compareStats
+      parameters:
+      - name: username1
+        in: query
+        description: 1st username for filter
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: username2
+        in: query
+        description: 2nd username for filter
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: username3
+        in: query
+        description: 3rd username for filter (optional)
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: username4
+        in: query
+        description: 4th username for filter (optional)
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stat'
+        "206":
+          description: Only one result found!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stat'
+        "400":
+          description: No players inserted!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "404":
+          description: No stats found for the players inserted!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+  /chess/playerMatches/{player_id}:
+    get:
+      tags:
+      - chess
+      summary: Check the number of games of a given player
+      description: External API call
+      operationId: findChessPlayerTotalMatches
+      parameters:
+      - name: player_id
+        in: path
+        description: the chess API username of the player
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: date
+        in: query
+        description: year/month format (defaults to current year/month if none is provided)
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: returns the total number of games the player has played in the period
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "404":
+          description: returns the foreign API error message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+  /chess/player/{player_id}:
+    get:
+      tags:
+      - chess
+      summary: Check the FIDE classification of a given chess player
+      description: External API call
+      operationId: findChessPlayerFIDEScore
+      parameters:
+      - name: player_id
+        in: path
+        description: the chess API username of the player
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Returns the best FIDE score of the player
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "404":
+          description: returns the foreign API error message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+  /user/signup:
+    post:
+      tags:
+      - user
+      summary: User registration
+      description: User registration form
+      operationId: userRegistration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_signup_body'
+            examples:
+              "0":
+                value: |-
+                  {
+                      "username": "John Doe",
+                      "email": "email@email.com",
+                      "password": "1234"
+                  }
+              "1":
+                value: |-
+                  {
+                      "username": "Rick James",
+                      "email": "email@email.com",
+                      "password": "abcd"
+                  }
+        required: true
+      responses:
+        "201":
+          description: Your profile has been created, please check your email for the activation message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "401":
+          description: Production - There's already a user with that username/email registered on this server! Inspector
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "400":
+          description: Production - Username, email and password fields must not be empty!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "500":
+          description: Development - database fields = not null, primary key or unique value constraint violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_500'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+  /user/login:
+    post:
+      tags:
+      - user
+      summary: User authentication
+      description: Login
+      operationId: userLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_login_body'
+            examples:
+              "0":
+                value: |-
+                  {
+                      "username": "John Doe",
+                      "password": "1234"
+                  }
+              "1":
+                value: |-
+                  {
+                      "username": "Rick James",
+                      "password": "abcd"
+                  }
+        required: true
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "400":
+          description: Empty username or password fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "404":
+          description: wrong username and/or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+  /user/profile:
+    get:
+      tags:
+      - user
+      summary: Access personal information/user profile
+      description: Returns the user profile information (user data and stats)
+      operationId: findUserProfile
+      parameters:
+      - name: username
+        in: query
+        description: username to get information
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+        "404":
+          description: failed to get profile information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+  /user/logout/{username}:
+    get:
+      tags:
+      - user
+      summary: Logout user from session
+      description: Logout user from session
+      operationId: Logout
+      parameters:
+      - name: username
+        in: path
+        description: the users username
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful logout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "400":
+          description: failed logout (user not logged in/ wrong username passed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+  /user/activation/{token}:
+    get:
+      tags:
+      - user
+      summary: Activates the user account
+      description: Link sent to the user by email with a pre-generated token
+      operationId: activation
+      parameters:
+      - name: token
+        in: path
+        description: token sent by email upon registration
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Account activated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "401":
+          description: Invalid token!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+  /user/forgotPassword:
+    patch:
+      tags:
+      - user
+      summary: Fogoten password path
+      description: Sends a link, by email, with a token for password reset. The token is valid for 10 minutes!
+      operationId: forgotenPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_forgotPassword_body'
+        required: true
+      responses:
+        "200":
+          description: Email sent, check inbox.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "400":
+          description: Profile is not activated!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "401":
+          description: Given email doesn't exist!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+  /user/resetPassword/{token}:
+    get:
+      tags:
+      - user
+      summary: On clicking the password reset link  on the email
+      description: This grants access to a screen for password reset.
+      operationId: passwordResetAccess
+      parameters:
+      - name: token
+        in: path
+        description: password reset token
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "302":
+          description: insert password on the new screen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "403":
+          description: password reset link expired (>10 minutes since 'forgotPassword' request)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+  /user/changePassword:
+    patch:
+      tags:
+      - user
+      summary: Reset user password
+      description: Submits a new password.
+      operationId: changePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user_changePassword_body'
+            examples:
+              "0":
+                value: |-
+                  {
+                      "username": "John Doe",
+                      "newPassword": "1234"
+                  }
+              "1":
+                value: |-
+                  {
+                      "username": "Rick James",
+                      "newPassword": "abcd"
+                  }
+        required: true
+      responses:
+        "200":
+          description: Password successfuly changed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "403":
+          description: No valid reset password request (token expired or no request made)!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+  /matches/player/{username}:
+    get:
+      tags:
+      - matches
+      summary: Check the matches of a given player
+      description: Returns the matches of the given username
+      operationId: findPlayerMatches
+      parameters:
+      - name: username
+        in: path
+        description: ID of user who's matches are to return
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Returns the player total games and each game details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "404":
+          description: Player not found!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+  /matches:
+    post:
+      tags:
+      - matches
+      summary: Register/save a new match in the database
+      description: Save a match result (updates players statistics)
+      operationId: save Match
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Match'
+            examples:
+              "0":
+                value: |-
+                  {
+                      "name": "Tic Tac Toe",
+                      "username1": "player1",
+                      "username2": "player2",
+                      "score1": "2",
+                      "score2": "0"
+                  }
+              "1":
+                value: |-
+                  {
+                      "name": "Tic Tac Toe",
+                      "username1": "player3",
+                      "username2": "player4",
+                      "score1": "1",
+                      "score2": "1"
+                  }
+        required: true
+      responses:
+        "200":
+          description: Game saved, players stats are updated as well
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "400":
+          description: Save match faillure! Same username(?)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "500":
+          description: failure to save (must check error message)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+  /matches/compare:
+    get:
+      tags:
+      - matches
+      summary: Compare the matches between 2 given players
+      description: Returns the matches from  2 players provided
+      operationId: compareMatches
+      parameters:
+      - name: username1
+        in: query
+        description: 1st username for filter
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: username2
+        in: query
+        description: 2nd username for filter
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation returns the number of games played between the 2 players, tha aggregated score of each player in those games and the games list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_2'
+        "404":
+          description: No games found between the given players
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "401":
+          description: Must provid 2 players to compare
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+      servers:
+      - url: https://challengeapi-1.herokuapp.com
+    servers:
+    - url: https://challengeapi-1.herokuapp.com
+components:
+  schemas:
+    Match:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        game:
+          type: string
+        username1:
+          $ref: '#/components/schemas/User/properties/username'
+        username2:
+          $ref: '#/components/schemas/User/properties/username'
+        score1:
+          type: integer
+          format: int64
+        score2:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+      xml:
+        name: Match
+    Stat:
+      type: object
+      properties:
+        username:
+          $ref: '#/components/schemas/User/properties/username'
+        victories:
+          type: integer
+          format: int64
+        defeats:
+          type: integer
+          format: int64
+        draws:
+          type: integer
+          format: int64
+      xml:
+        name: Stat
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        active:
+          type: boolean
+          default: false
+        passwordResetToken:
+          type: string
+        passwordResetExpires:
+          type: string
+          format: date-time
+        loggedIn:
+          type: boolean
+          default: false
+      xml:
+        name: User
+    inline_response_404:
+      type: object
+      properties:
+        message:
+          type: string
+    user_signup_body:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    inline_response_500:
+      type: object
+      properties:
+        status:
+          type: string
+        error:
+          type: object
+    user_login_body:
+      type: object
+      properties:
+        password:
+          type: string
+        username:
+          type: string
+    inline_response_200:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/inline_response_200_data'
+    inline_response_200_1:
+      type: object
+      properties:
+        profile:
+          $ref: '#/components/schemas/inline_response_200_1_profile'
+    user_forgotPassword_body:
+      type: object
+      properties:
+        email:
+          type: string
+    user_changePassword_body:
+      type: object
+      properties:
+        username:
+          type: string
+        newPassword:
+          type: string
+    inline_response_200_2:
+      type: object
+      properties:
+        gamesPlayed:
+          type: string
+        scoreUser1:
+          type: string
+        scoreUser2:
+          type: string
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/Match'
+    inline_response_200_data:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+      example: null
+    inline_response_200_1_profile:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        victories:
+          type: integer
+        draws:
+          type: integer
+        defeats:
+          type: integer
+      example: null
