@@ -7,25 +7,19 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios');
 
 exports.getMe = catchAsync(async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my data is still to be impemented.' });
+  return res.status(501).json({ message: 'Get my data is still to be impemented.' });
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
-  const user = await User.findByPk(req.params.username);
+  const user = await User.findOne({ where: { passwordResetToken: req.params.token } });
   if (!user) {
-    return next(new AppError('Wrong username!', 401));
-  }
-  if (user.active) {
-    return next(new AppError('User is already activated!', 400));
+    return next(new AppError(`This token isn't valid!`, 401));
   }
   user.active = true;
+  user.passwordResetToken = null;
   if (await user.save()) {
-    const newStat = await Stat.create({ username: user.username });
-    return res
-      .status(200)
-      .json({ message: 'Your account has been activated successfully.' });
+    await Stat.create({ username: user.username });
+    return res.status(200).json({ message: 'Your account has been activated successfully.' });
   }
 });
 
@@ -51,8 +45,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         \n${url}`,
     });
     return res.status(200).json({
-      message:
-        'Email has been sent. Check your inbox for password recovery instructions.',
+      message: 'Email has been sent. Check your inbox for password recovery instructions.',
     });
   }
 });
