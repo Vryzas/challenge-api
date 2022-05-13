@@ -31,8 +31,7 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
 });
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  const email = req.body.email;
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ where: { email: req.body.email } });
   if (!user) {
     return next(new AppError('No user with that email!', 401));
   }
@@ -45,7 +44,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   user.passwordResetToken = token;
   user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
   if (await user.save()) {
-    await sendEmail({
+    sendEmail({
       email: user.email,
       subject: 'Password reset',
       message: `To reset your password, please click the link within the next 10 minutes.
@@ -68,13 +67,13 @@ exports.resetPassword = catchAsync(async function (req, res, next) {
 
   if (user && new Date(+Date.now()) < +user.passwordResetExpires) {
     return res.status(302).json({
-      message: 'Please insert a new password in the highlighted field',
+      message: 'Please insert a new password in the highlighted field.',
     });
   }
 });
 
 exports.passwordRedefined = catchAsync(async (req, res, next) => {
-  const user = await User.findByPk(req.params.username);
+  const user = await User.findByPk(req.body.username);
   if (!user.passwordResetToken || !user.passwordResetExpires) {
     return next(new AppError(`You don't have a password reset request!`, 403));
   }
@@ -83,7 +82,7 @@ exports.passwordRedefined = catchAsync(async (req, res, next) => {
   user.passwordResetExpires = null;
   if (user.save()) {
     return res.status(200).json({
-      message: `${req.params.username}, your password has been redefined successfully.`,
+      message: `${req.body.username}, your password has been redefined successfully.`,
     });
   }
 });
