@@ -1,8 +1,8 @@
 const catchAsync = require('./../utils/catchAsync');
 const axios = require('axios');
 
-exports.chessPlayer = catchAsync(async (req, res, next) => {
-  const player = req.body.player;
+exports.player = catchAsync(async (req, res, next) => {
+  const player = req.params.player_id;
   const url = `https://api.chess.com/pub/player/${player}/stats`;
   let status;
   let message;
@@ -10,7 +10,7 @@ exports.chessPlayer = catchAsync(async (req, res, next) => {
     .get(url)
     .then((response) => {
       status = response.status;
-      message = response.data.fide || 'No data about that player found!';
+      message = response.data.fide || 'No FIDE score for this player found!';
     })
     .catch((error) => {
       status = error.response.status;
@@ -21,9 +21,10 @@ exports.chessPlayer = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.chessMatchesByPlayer = catchAsync(async (req, res, next) => {
-  const player = req.body.player;
-  const url = `https://api.chess.com/pub/player/${player}/games/2022/04`;
+exports.playerMatches = catchAsync(async (req, res, next) => {
+  const player = req.params.player_id;
+  const date = req.query.date || new Date().getFullYear() + `/` + ('0' + (new Date().getMonth() + 1)).slice(-2);
+  const url = `https://api.chess.com/pub/player/${player}/games/${date}`;
   let status;
   let message;
   await axios
@@ -31,7 +32,7 @@ exports.chessMatchesByPlayer = catchAsync(async (req, res, next) => {
     .then((response) => {
       status = response.status;
       message = {
-        games: response.data.games.length || 'No games from that player found!',
+        games: response.data.games.length || `This player hasn't played any games in this period!`,
       };
     })
     .catch((error) => {
