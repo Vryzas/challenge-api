@@ -5,9 +5,16 @@ const Stat = require(`./../models/statsModel`);
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const { sequelize } = require('./../models/userModel');
 
 exports.getMe = catchAsync(async function (req, res, next) {
-  return res.status(501).json({ message: 'Get my data is still to be impemented.' });
+  const [userProfile, metadata] = await sequelize.query(
+    `SELECT u.username, u.email, s.victories, s.draws, s.defeats FROM Users u, Stats s WHERE u.username='${req.query.username}';`
+  );
+  if (userProfile.length === 0) {
+    return res.status(404).json({ message: `Failed to get ${req.query.username} profile data!` });
+  }
+  return res.status(200).json({ profile: userProfile[0] });
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
