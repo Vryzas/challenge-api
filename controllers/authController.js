@@ -2,19 +2,23 @@ const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const jwt = require('jsonwebtoken');
 
 exports.signup = catchAsync(async (req, res, next) => {
   let { username, email, password } = req.body;
   if (!username || !email || !password) {
     (username = null), (email = null), (password = null);
   }
+  const key = username;
+  const token = jwt.sign({ key }, process.env.JWT_SECRET);
   const newUser = await User.create({
     username: username,
     email: email,
     password: password,
+    passwordResetToken: token,
   });
-  const url = `${req.protocol}://${req.get('host')}/activateMe/${newUser.username}`;
-  await sendEmail({
+  const url = `${req.protocol}://${req.get('host')}/activation/${newUser.passwordResetToken}`;
+  sendEmail({
     email: newUser.email,
     subject: 'Your profile has been created',
     message: `Please click the link to activate your account. 
