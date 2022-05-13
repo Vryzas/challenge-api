@@ -2,6 +2,9 @@ const catchAsync = require('./../utils/catchAsync');
 const Stat = require('./../models/statsModel');
 
 exports.findStats = catchAsync(async (req, res, next) => {
+  if (!req.params.username) {
+    return res.status(400).json({ message: `No player name given!` });
+  }
   const userStats = await Stat.findByPk(req.params.username);
   if (!userStats) {
     return res.status(404).json({ message: `No player with that name found!` });
