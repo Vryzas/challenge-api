@@ -36,19 +36,22 @@ exports.playerMatches = catchAsync(async function (req, res, next) {
 });
 
 exports.compareMatches = catchAsync(async function (req, res, next) {
+  if (!req.query.username1 || !req.query.username2) {
+    return res.status(401).json({ message: `You must supply two players for comparisson!` });
+  }
   const gamesUser = await Match.findAll({
     where: {
       [Op.or]: [
-        { username1: req.body.username1, username2: req.body.username2 },
-        { username1: req.body.username2, username2: req.body.username1 },
+        { username1: req.query.username1, username2: req.query.username2 },
+        { username1: req.query.username2, username2: req.query.username1 },
       ],
     },
   });
   if (!gamesUser.length >= 1) {
     return res.status(404).json({ message: `No games found between these players!` });
   }
-  const scored1 = getTotalScore(gamesUser, req.body.username1);
-  const scored2 = getTotalScore(gamesUser, req.body.username2);
+  const scored1 = getTotalScore(gamesUser, req.query.username1);
+  const scored2 = getTotalScore(gamesUser, req.query.username2);
 
   return res.status(200).json({
     gamesPlayed: gamesUser.length,
@@ -62,7 +65,7 @@ exports.addMatch = catchAsync(async function (req, res, next) {
   if (req.body.username1 === req.body.username2) {
     return next(new AppError(`Save game fail! Same username on both players!?`, 400));
   }
-  const newGame = await Match.create({
+  await Match.create({
     game: req.body.game,
     username1: req.body.username1,
     username2: req.body.username2,
