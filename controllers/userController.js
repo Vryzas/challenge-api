@@ -1,56 +1,36 @@
 const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
-const axios = require('axios');
 
-exports.getMe = async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my data is still to be impemented.' });
+exports.profile = async function (req, res, next) {
+  return res.status(501).json({ message: 'Get my data is still to be impemented.' });
 };
 
-exports.getMyStats = async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my statistics is still to be impemented.' });
+exports.stats = async function (req, res, next) {
+  return res.status(501).json({ message: 'Get my statistics is still to be impemented.' });
 };
 
-exports.getMyMatches = async function (req, res, next) {
-  return res
-    .status(501)
-    .json({ message: 'Get my matches is still to be impemented.' });
+exports.matches = async function (req, res, next) {
+  return res.status(501).json({ message: 'Get my matches is still to be impemented.' });
 };
 
-exports.activateAccount = async (req, res, next) => {
-  // check if user exists and is already activated
+exports.activate = async (req, res, next) => {
   const user = await User.findByPk(req.params.username);
-  if (!user || user.active) {
-    return res
-      .status(400)
-      .json({ message: 'Wrong username or user is already activated!' });
+  if (user.active) {
+    return res.status(400).json({ message: 'User is already activated!' });
   }
   try {
     user.active = true;
     if (await user.save()) {
-      return res
-        .status(200)
-        .json({ message: 'Your account has been activated successfully.' });
+      return res.status(200).json({ message: 'Your account has been activated successfully.' });
     }
   } catch (err) {
-    return res
-      .status(400)
-      .json({ message: 'Something went wrong with your activation!' });
+    return res.status(400).json({ message: 'Something went wrong with your activation!' });
   }
 };
 
 exports.forgotPassword = async (req, res, next) => {
-  const email = req.body.email;
-  const user = await User.findOne({ email: email });
-  if (!user || !user.active) {
-    return res
-      .status(404)
-      .json({ message: 'No user with that email or user is not active!' });
-  }
+  const user = await User.findOne({ where: { email: req.body.email } });
   try {
     const key = user.username;
     const token = jwt.sign({ key }, process.env.JWT_SECRET);
@@ -65,8 +45,7 @@ exports.forgotPassword = async (req, res, next) => {
         \n${url}`,
       });
       return res.status(200).json({
-        message:
-          'Email has been sent. Check your inbox for password recovery instructions.',
+        message: 'Email has been sent. Check your inbox for password recovery instructions.',
       });
     }
   } catch (err) {
@@ -78,7 +57,9 @@ exports.forgotPassword = async (req, res, next) => {
 };
 
 exports.resetPassword = async function (req, res, next) {
-  const user = await User.findOne({ passwordResetToken: req.params.token });
+  const user = await User.findOne({
+    where: { passwordResetToken: req.params.token },
+  });
   try {
     if (user && new Date(+Date.now()) < +user.passwordResetExpires) {
       return res.status(302).json({
@@ -86,16 +67,14 @@ exports.resetPassword = async function (req, res, next) {
       });
     }
     if (!user || new Date(+Date.now()) > +user.passwordResetExpires) {
-      return res
-        .status(403)
-        .json({ message: 'Your password reset link has expired!' });
+      return res.status(403).json({ message: 'Your password reset link has expired!' });
     }
   } catch (err) {
     return res.status(501).json({ message: 'Something went wrong!' });
   }
 };
 
-exports.passwordRedefined = async (req, res, next) => {
+exports.changePassword = async (req, res, next) => {
   const user = await User.findByPk(req.params.username);
   try {
     if (!user.passwordResetToken || !user.passwordResetExpires) {
