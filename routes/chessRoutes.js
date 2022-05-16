@@ -4,7 +4,7 @@ const chessController = require('./../controllers/chessController');
 
 const router = express.Router();
 
-router.get('/chessMatchesByPlayer', chessController.chessMatchesByPlayer);
-router.get('/chessPlayer', chessController.chessPlayer);
+router.get('/player/:player_id', chessController.player);
+router.get('/playerMatches/:player_id', chessController.playerMatches);
 
 module.exports = router;

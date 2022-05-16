@@ -10,9 +10,9 @@ router.post('/signup', authController.signup);
 router.post('/login', validation.activeUser, authController.login);
 router.get('/logout', authController.logout);
 
-router.get('/getMe', validation.activeUser, userController.getMe);
-router.get('/getMyStats', validation.activeUser, userController.getMyStats);
-router.get('/getMyMatches', validation.activeUser, userController.getMyMatches);
+router.get('/profile', validation.activeUser, userController.profile);
+router.get('/stats', validation.activeUser, userController.stats);
+router.get('/matches', validation.activeUser, userController.matches);
 
 router.patch('/activate/:username', userController.activate);
 router.patch('/forgotPassword', validation.activeUser, userController.forgotPassword);

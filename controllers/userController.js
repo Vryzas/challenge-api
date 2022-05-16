@@ -2,15 +2,15 @@ const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
 
-exports.getMe = async function (req, res, next) {
+exports.profile = async function (req, res, next) {
   return res.status(501).json({ message: 'Get my data is still to be impemented.' });
 };
 
-exports.getMyStats = async function (req, res, next) {
+exports.stats = async function (req, res, next) {
   return res.status(501).json({ message: 'Get my statistics is still to be impemented.' });
 };
 
-exports.getMyMatches = async function (req, res, next) {
+exports.matches = async function (req, res, next) {
   return res.status(501).json({ message: 'Get my matches is still to be impemented.' });
 };
 
