@@ -1,5 +1,5 @@
-const { Sequelize, DataTypes, Model } = require("sequelize");
-const sequelize = require("./../utils/dbconnection");
+const { Sequelize, DataTypes, Model } = require('sequelize');
+const sequelize = require('./../utils/dbconnection');
 
 class User extends Model {}
 
@@ -13,7 +13,7 @@ User.init(
     },
     email: {
       type: DataTypes.STRING,
-      unique: true,
+      inique: true,
       allowNull: false,
     },
     password: {
@@ -31,7 +31,7 @@ User.init(
   },
   {
     sequelize,
-    modelName: "User",
+    modelName: 'User',
     timestamps: false,
   }
 );
