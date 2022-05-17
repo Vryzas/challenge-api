@@ -1,3 +1,5 @@
+const AppError = require('./../utils/appError');
+
 const sendErrorDev = (err, res) => {
   res.status(err.status).json({
     message: err.message,
@@ -6,7 +8,7 @@ const sendErrorDev = (err, res) => {
 };
 
 const sendErrorProd = (err, res) => {
-  if (err.isOperational) {
+  if (err instanceof AppError) {
     // operational errors are "expected to happen" (ie:server connection failure, invalid user input, request timeout, etc.)
     res.status(err.status).json({
       message: err.message,
