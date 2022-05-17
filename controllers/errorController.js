@@ -1,7 +1,5 @@
 const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
+  res.status(err.status).json({
     message: err.message,
     stack: err.stack,
   });
@@ -10,8 +8,7 @@ const sendErrorDev = (err, res) => {
 const sendErrorProd = (err, res) => {
   if (err.isOperational) {
     // operational errors are "expected to happen" (ie:server connection failure, invalid user input, request timeout, etc.)
-    res.status(err.statusCode).json({
-      status: err.status,
+    res.status(err.status).json({
       message: err.message,
     });
   } else {
@@ -25,8 +22,6 @@ const sendErrorProd = (err, res) => {
 };
 
 module.exports = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
