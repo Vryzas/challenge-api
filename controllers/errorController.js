@@ -9,11 +9,13 @@ const sendErrorDev = (err, res) => {
 
 const sendErrorProd = (err, res) => {
   if (err.isOperational) {
+    // operational errors are "expected to happen" (ie:server connection failure, invalid user input, request timeout, etc.)
     res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
     });
   } else {
+    // non operational errors will be programmer related errors (bugs)
     console.error('ERROR', err);
     res.status(500).json({
       status: 'error',
