@@ -7,18 +7,19 @@ const sendErrorDev = (err, res) => {
   });
 };
 
+// production errors can be foressen and handled explicitly with a specific msg or, unforeseen and handled generically
 const sendErrorProd = (err, res) => {
   if (err instanceof AppError) {
-    // operational errors are "expected to happen" (ie:server connection failure, invalid user input, request timeout, etc.)
+    // instances of AppError are foreseen (ie:server connection failure, invalid user input, request timeout, etc.)
     res.status(err.status).json({
       message: err.message,
     });
   } else {
-    // non operational errors will be programmer related errors (bugs)
+    // generic handler (for programmer related errors/bugs)
     console.error('ERROR', err);
     res.status(500).json({
-      status: 'error',
       message: 'Something went wrong!',
+      status: 'error',
     });
   }
 };
