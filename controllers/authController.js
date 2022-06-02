@@ -26,7 +26,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.login = async (req, res, next) => {
+exports.login = catchAsync(async (req, res, next) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ message: 'Please provide username and password!' });
@@ -45,7 +45,7 @@ exports.login = async (req, res, next) => {
     message: 'Login successful.',
     data: { username: user.username, email: user.email },
   });
-};
+});
 
 exports.logout = catchAsync(async function (req, res, next) {
   const user = await User.findByPk(req.params.username);
