@@ -5,16 +5,21 @@ const AppError = require('./../utils/appError');
 
 exports.signup = catchAsync(async (req, res, next) => {
   let { username, email, password } = req.body;
-  if (!username || !email || !password) {
-    (username = null), (email = null), (password = null);
+  let newUser;
+  try {
+    newUser = await User.create({
+      username: username,
+      email: email,
+      password: password,
+    });
+  } catch (error) {
+    const val = error.fields.email ? `email` : `username`;
+    return res.status(401).json({ message: `There's already a user with that ${val} registered on this server!` });
   }
-  const newUser = await User.create({
-    username: username,
-    email: email,
-    password: password,
-  });
-  const url = `${req.protocol}://${req.get('host')}/activateMe/${newUser.username}`;
-  await sendEmail({
+
+  const url = `${req.protocol}://${req.get('host')}/user/activation/${newUser.username}`;
+
+  sendEmail({
     email: newUser.email,
     subject: 'Your profile has been created',
     message: `Please click the link to activate your account. 
