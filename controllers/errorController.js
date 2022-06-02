@@ -1,14 +1,3 @@
-const AppError = require('./../utils/appError');
-
-// const handleDBDuplicates = (err) => {
-//   const val = err.fields.email ? `email` : `username`;
-//   return new AppError(`There's already a user with that ${val} registered on this server!`, 401);
-// };
-
-// const handleNullError = (err) => {
-//   return new AppError('Username, email and password fields must not be empty!', 400);
-// };
-
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,

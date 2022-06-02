@@ -8,7 +8,7 @@ const cors = require('cors');
 
 const sequelize = require('./utils/dbconnection');
 const AppError = require('./utils/appError');
-const globalErrorHandler = require('./controllers/errorController');
+const errorController = require('./controllers/errorController');
 
 const userRouter = require('./routes/userRoutes');
 const statsRouter = require('./routes/userStatsRoutes');
@@ -62,6 +62,6 @@ app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
-app.use(globalErrorHandler);
+app.use(errorController);
 
 module.exports = app;
