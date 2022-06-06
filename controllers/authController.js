@@ -1,6 +1,7 @@
 const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
+const errorController = require('./../controllers/errorController');
 const AppError = require('./../utils/appError');
 
 exports.signup = catchAsync(async (req, res, next) => {
@@ -26,27 +27,25 @@ exports.signup = catchAsync(async (req, res, next) => {
       If you haven't created a profile please ignore this message.
       \n${url}`,
   });
-  return res.status(201).json({
+  res.status(201).json({
     message: 'Your profile has been created, please check your email for the activation message.',
   });
 });
 
 exports.login = catchAsync(async (req, res, next) => {
   const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Please provide username and password!' });
-  }
-
   const user = await User.findByPk(username);
+
   if (!user) {
-    return next(new AppError(`Wrong username!`, 400));
+    return errorController(new AppError(`Wrong username!`, 400), res);
   }
   if (password !== user.password) {
-    return next(new AppError(`Wrong password!`, 400));
+    return errorController(new AppError(`Wrong password!`, 400), res);
   }
+
   user.logedIn = true;
   user.save();
-  return res.status(200).json({
+  res.status(200).json({
     message: 'Login successful.',
     data: { username: user.username, email: user.email },
   });
@@ -55,12 +54,12 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.logout = catchAsync(async function (req, res, next) {
   const user = await User.findByPk(req.params.username);
   if (!user) {
-    return next(new AppError('No user with this username!', 400));
+    return errorController(new AppError('No user with this username!', 400), res);
   }
   if (!user.logedIn) {
-    return next(new AppError(`This user isn't logged in!`, 400));
+    return errorController(new AppError(`This user isn't logged in!`, 400), res);
   }
   user.logedIn = false;
   user.save();
-  return res.status(200).json({ message: 'Logout successful.' });
+  res.status(200).json({ message: 'Logout successful.' });
 });
