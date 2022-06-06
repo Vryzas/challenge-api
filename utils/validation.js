@@ -29,3 +29,20 @@ exports.signupFields = (req, res, next) => {
     res.status(ret.status).json({ message: ret.message });
   }
 };
+
+exports.loginFields = (req, res, next) => {
+  const ret = {};
+  if (!req.body.username) {
+    ret.message = 'No username provided!';
+    ret.status = 400;
+  }
+  if (!req.body.password) {
+    ret.message = 'No password provided!';
+    ret.status = 400;
+  }
+  if (Object.keys(ret).length === 0) {
+    next();
+  } else {
+    res.status(ret.status).json({ message: ret.message });
+  }
+};
