@@ -59,7 +59,7 @@ app.use('/matches', matchesRouter);
 app.use('/chess', chessRouter);
 
 app.all('*', (req, res, next) => {
-  errorController(new AppError(`Can't find ${req.originalUrl} on this server!`, 404), req, res, next);
+  errorController(new AppError(`Can't find ${req.originalUrl} on this server!`, 404), res);
 });
 
 if (process.env.NODE_ENV === 'production') {
