@@ -2,8 +2,7 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const Match = require('./../models/matchModel');
 const User = require(`./../models/userModel`);
-const Stat = require(`./../models/statsModel`);
-const { Op } = require('sequelize');
+const sequelize = require('../utils/dbconnection');
 const lodash = require('lodash');
 
 // receives the array of matches a user has played
@@ -17,6 +16,13 @@ const getTotalScore = (games, user) => {
     })
   );
   return score;
+};
+
+// increments the 'column' (draws, victories or defeats) for a given 'player'
+const statIncrement = async function (player, column) {
+  await sequelize.query(`UPDATE Stats
+  SET ${column}= ${column}+1
+  WHERE username='${player}'`);
 };
 
 exports.playerMatches = catchAsync(async function (req, res, next) {
@@ -56,14 +62,14 @@ exports.compareMatches = catchAsync(async function (req, res, next) {
 
   return res.status(200).json({
     message: `${req.body.username1} and ${req.body.username2} played a total of ${gamesUsers.length} matches.
-      ${req.body.username1} scored a total of ${user1Score} points and ${req.body.username2} scored atotal of ${user2Score} points.`,
+      ${req.body.username1} scored a total of ${user1Score} points and ${req.body.username2} scored a total of ${user2Score} points.`,
     data: gamesUsers,
   });
 });
 
 exports.addMatch = catchAsync(async function (req, res, next) {
   if (req.body.username1 === req.body.username2) {
-    return next(new AppError(`Save game fail! Same username on both players!?`, 400));
+    return next(new AppError(`Cannot save game! Username is the same on both players!`, 400));
   }
   const newGame = await Match.create({
     game: req.body.game,
@@ -72,43 +78,20 @@ exports.addMatch = catchAsync(async function (req, res, next) {
     score1: req.body.score1,
     score2: req.body.score2,
   });
+  // updates the players stats
   if (req.body.score1 === req.body.score2) {
-    await Stat.increment(
-      { draws: 1 },
-      {
-        where: {
-          [Op.or]: [{ username: req.body.username1 }, { username: req.body.username2 }],
-        },
-      }
-    );
+    // draws+1 for both players
+    await statIncrement(req.body.username1, 'draws');
+    await statIncrement(req.body.username2, 'draws');
   }
   if (req.body.score1 > req.body.score2) {
-    await Stat.increment(
-      { victories: 1 },
-      {
-        where: { username: req.body.username1 },
-      }
-    );
-    await Stat.increment(
-      { defeats: 1 },
-      {
-        where: { username: req.body.username2 },
-      }
-    );
+    // victory+1 player1, defeat+1 player2
+    await statIncrement(req.body.username1, 'victories');
+    await statIncrement(req.body.username2, 'defeats');
   }
   if (req.body.score1 < req.body.score2) {
-    await Stat.increment(
-      { victories: 1 },
-      {
-        where: { username: req.body.username2 },
-      }
-    );
-    await Stat.increment(
-      { defeats: 1 },
-      {
-        where: { username: req.body.username1 },
-      }
-    );
+    // defeat+1 player1, victory+=sername1, 'defeats');
+    await statIncrement(req.body.username2, 'victories');
   }
 
   return res.status(201).json({
