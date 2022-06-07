@@ -24,14 +24,15 @@ exports.playerMatches = catchAsync(async function (req, res, next) {
   if (!player) {
     return next(new AppError(`No player with that username found!`, 400));
   }
-  const games = await Match.findAll({
+  // returns the array of matches played by the given player
+  const playerGames = await Match.findAll({
     where: {
       [Op.or]: [{ username1: req.params.username }, { username2: req.params.username }],
     },
   });
   return res.status(200).json({
-    message: games.length,
-    games: games,
+    message: `Player ${player.username} played ${playerGames.length} matches.`,
+    games: playerGames,
   });
 });
 
