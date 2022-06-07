@@ -10,10 +10,12 @@ const sequelize = require('./utils/dbconnection');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
+const sequelize = require('./utils/dbconnection');
 const userRouter = require('./routes/userRoutes');
-const statsRouter = require('./routes/userStatsRoutes');
+const statsRouter = require('./routes/statsRoutes');
 const matchesRouter = require('./routes/matchRoutes');
 const chessRouter = require('./routes/chessRoutes');
+
 // Start express app
 const app = express();
 
@@ -53,7 +55,7 @@ app.use(compression());
   }
 })();
 
-app.use('/', userRouter);
+app.use('/user', userRouter);
 app.use('/stats', statsRouter);
 app.use('/matches', matchesRouter);
 app.use('/chess', chessRouter);

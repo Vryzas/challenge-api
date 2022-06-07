@@ -32,13 +32,16 @@ exports.login = async (req, res, next) => {
     }
 
     const user = await User.findByPk(username);
-    if (!user || password !== user.password) {
-      return res.status(401).json({ message: 'Wrong username or password!' });
+    if (!user) {
+      return res.status(401).json({ message: 'Wrong username!' });
+    }
+    if (password !== user.password) {
+      return res.status(401).json({ message: 'Wrong password!' });
     }
     if (user.loggedIn) {
-      return res.status(400).json({ message: 'User already loged in' });
+      return res.status(400).json({ message: 'User already logged in' });
     }
-    user.logedIn = true;
+    user.loggedIn = true;
     user.save();
     return res.status(200).json({
       message: 'Login successful.',
@@ -54,10 +57,10 @@ exports.logout = async function (req, res, next) {
   if (!user) {
     return res.status(500).json({ message: 'Something went wrong!' });
   }
-  if (!user.logedIn) {
+  if (!user.loggedIn) {
     return res.status(500).json({ message: `This user isn't logged in!` });
   }
-  user.logedIn = false;
+  user.loggedIn = false;
   user.save();
   return res.status(200).json({ message: 'Logout successful.' });
 };

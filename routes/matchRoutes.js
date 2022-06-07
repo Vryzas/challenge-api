@@ -4,9 +4,9 @@ const matchController = require('./../controllers/matchController');
 
 const router = express.Router();
 
-router.get('/playerMatches/:username', matchController.playerMatches);
-router.get('/compareMatches/:compareTo', matchController.compareMatches);
+router.get('/player/:username', matchController.player);
+router.get('/compare', matchController.compare);
 
-router.post('/addMatch', matchController.addMatch);
+router.post('/', matchController.newMatch);
 
 module.exports = router;

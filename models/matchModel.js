@@ -50,5 +50,4 @@ Match.init(
 );
 
 Match.sync({ alter: true });
-console.log(Match === sequelize.models.Match);
 module.exports = Match;
