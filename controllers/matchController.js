@@ -6,14 +6,14 @@ const Stat = require(`./../models/statsModel`);
 const { Op } = require('sequelize');
 const lodash = require('lodash');
 
+// receives the array of matches a user has played
 const getTotalScore = (games, user) => {
+  // lodash.sum computes the sum of the values of an array
   const score = lodash.sum(
+    // array.map returns an array of values wich fulfil the condition
+    // without changing the original
     games.map((val) => {
-      if (user === val.username1) {
-        return val.score1;
-      } else {
-        return val.score2;
-      }
+      return user === val.username1 ? val.score1 : val.score2;
     })
   );
   return score;
