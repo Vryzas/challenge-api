@@ -32,12 +32,14 @@ exports.playerMatches = catchAsync(async function (req, res, next) {
   });
   return res.status(200).json({
     message: `Player ${player.username} played ${playerGames.length} matches.`,
-    games: playerGames,
+    data: playerGames,
   });
 });
 
 exports.compareMatches = catchAsync(async function (req, res, next) {
-  const gamesUser = await Match.findAll({
+  //returns an array with the matches featuring only the given players
+  const gamesUsers = await Match.findAll({
+    // finds games where username1 vs username2 OR username2 vs username1
     where: {
       [Op.or]: [
         { username1: req.body.username1, username2: req.body.username2 },
@@ -45,17 +47,17 @@ exports.compareMatches = catchAsync(async function (req, res, next) {
       ],
     },
   });
-  if (!gamesUser.length >= 1) {
+  if (gamesUsers.length === 0) {
     return res.status(404).json({ message: `No games found between these players!` });
   }
-  const scored1 = getTotalScore(gamesUser, req.body.username1);
-  const scored2 = getTotalScore(gamesUser, req.body.username2);
+  // will get the total score of each player
+  const user1Score = getTotalScore(gamesUsers, req.body.username1);
+  const user2Score = getTotalScore(gamesUsers, req.body.username2);
 
   return res.status(200).json({
-    gamesPlayed: gamesUser.length,
-    user1: scored1,
-    user2: scored2,
-    games: gamesUser,
+    message: `${req.body.username1} and ${req.body.username2} played a total of ${gamesUsers.length} matches.
+      ${req.body.username1} scored a total of ${user1Score} points and ${req.body.username2} scored atotal of ${user2Score} points.`,
+    data: gamesUsers,
   });
 });
 
