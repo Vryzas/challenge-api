@@ -17,7 +17,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     password: password,
     passwordResetToken: token,
   });
-  const url = `${req.protocol}://${req.get('host')}/activation/${newUser.passwordResetToken}`;
+  const url = `${req.protocol}://${req.get('host')}/user/activation/${newUser.passwordResetToken}`;
   sendEmail({
     email: newUser.email,
     subject: 'Your profile has been created',
