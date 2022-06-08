@@ -63,7 +63,6 @@ exports.resetPassword = catchAsync(async function (req, res, next) {
     where: { passwordResetToken: req.params.token },
   });
   if (!user || now > +user.passwordResetExpires) {
-    console.log(user);
     return next(new AppError('Your password reset link has expired!', 403));
   }
 
