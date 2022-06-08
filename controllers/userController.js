@@ -41,7 +41,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
   const key = user.username;
   const token = jwt.sign({ key }, process.env.JWT_SECRET);
-  const url = `${req.protocol}://${req.get('host')}/resetPassword/${token}`;
+  const url = `${req.protocol}://${req.get('host')}/user/resetPassword/${token}`;
   user.passwordResetToken = token;
   user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
   if (await user.save()) {
@@ -58,15 +58,16 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async function (req, res, next) {
+  const now = new Date(+Date.now());
   const user = await User.findOne({
     where: { passwordResetToken: req.params.token },
   });
-  if (!user || new Date(+Date.now()) > +user.passwordResetExpires) {
+  if (!user || now > +user.passwordResetExpires) {
     console.log(user);
     return next(new AppError('Your password reset link has expired!', 403));
   }
 
-  if (user && new Date(+Date.now()) < +user.passwordResetExpires) {
+  if (user && now < +user.passwordResetExpires) {
     return res.status(302).json({
       message: 'Please insert a new password in the highlighted field.',
     });
