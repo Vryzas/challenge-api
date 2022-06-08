@@ -7,6 +7,10 @@ const compression = require('compression');
 const cors = require('cors');
 
 const sequelize = require('./utils/dbconnection');
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
+
+const sequelize = require('./utils/dbconnection');
 const userRouter = require('./routes/userRoutes');
 const statsRouter = require('./routes/statsRoutes');
 const matchesRouter = require('./routes/matchRoutes');
@@ -57,7 +61,7 @@ app.use('/matches', matchesRouter);
 app.use('/chess', chessRouter);
 
 app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+  globalErrorHandler(new AppError(404, `Can't find ${req.originalUrl} on this server!`), req, res, next);
 });
 
 module.exports = app;
