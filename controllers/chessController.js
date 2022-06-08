@@ -22,8 +22,10 @@ exports.player = catchAsync(async (req, res, next) => {
 });
 
 exports.playerMatches = catchAsync(async (req, res, next) => {
+  const currentDate = new Date().getFullYear() + `/` + ('0' + (new Date().getMonth() + 1)).slice(-2);
   const player = req.params.player_id;
-  const date = req.query.date || new Date().getFullYear() + `/` + ('0' + (new Date().getMonth() + 1)).slice(-2);
+  // if no date is provided, should default to current date
+  const date = req.query.date || currentDate;
   const url = `https://api.chess.com/pub/player/${player}/games/${date}`;
   let status;
   let message;
@@ -31,9 +33,7 @@ exports.playerMatches = catchAsync(async (req, res, next) => {
     .get(url)
     .then((response) => {
       status = response.status;
-      message = {
-        games: response.data.games.length || `This player hasn't played any games in this period!`,
-      };
+      message = `Player ${req.params.player_id} played ${response.data.games.length} games during ${date}.`;
     })
     .catch((error) => {
       status = error.response.status;
