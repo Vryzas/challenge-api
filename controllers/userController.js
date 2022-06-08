@@ -8,13 +8,14 @@ const axios = require('axios');
 const { sequelize } = require('./../models/userModel');
 
 exports.getMe = catchAsync(async function (req, res, next) {
+  // retrieves user info and stats in the same query (except password)
   const [userProfile, metadata] = await sequelize.query(
-    `SELECT u.username, u.email, s.victories, s.draws, s.defeats FROM Users u, Stats s WHERE u.username='${req.query.username}';`
+    `SELECT u.username, u.email, s.victories, s.draws, s.defeats FROM Users u, Stats s WHERE u.username='${req.query.username}' AND s.username=u.username;`
   );
   if (userProfile.length === 0) {
     return res.status(404).json({ message: `Failed to get ${req.query.username} profile data!` });
   }
-  return res.status(200).json({ profile: userProfile[0] });
+  return res.status(200).json({ message: `Found ${req.query.username} profile.`, data: userProfile });
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
