@@ -15,11 +15,10 @@ exports.signup = catchAsync(async (req, res, next) => {
     });
   } catch (error) {
     const val = error.fields.email ? `email` : `username`;
-    return res.status(401).json({ message: `There's already a user with that ${val} registered on this server!` });
+    res.status(401).json({ message: `There's already a user with that ${val} registered on this server!` });
+    return;
   }
-
   const url = `${req.protocol}://${req.get('host')}/user/activation/${newUser.username}`;
-
   sendEmail({
     email: newUser.email,
     subject: 'Your profile has been created',
@@ -37,10 +36,12 @@ exports.login = catchAsync(async (req, res, next) => {
   const user = await User.findByPk(username);
 
   if (!user) {
-    return errorController(new AppError(`Wrong username!`, 400), res);
+    errorController(new AppError(`Wrong username!`, 400), res);
+    return;
   }
   if (password !== user.password) {
-    return errorController(new AppError(`Wrong password!`, 400), res);
+    errorController(new AppError(`Wrong password!`, 400), res);
+    return;
   }
 
   user.logedIn = true;
@@ -54,10 +55,12 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.logout = catchAsync(async function (req, res, next) {
   const user = await User.findByPk(req.params.username);
   if (!user) {
-    return errorController(new AppError('No user with this username!', 400), res);
+    errorController(new AppError('No user with this username!', 400), res);
+    return;
   }
   if (!user.logedIn) {
-    return errorController(new AppError(`This user isn't logged in!`, 400), res);
+    errorController(new AppError(`This user isn't logged in!`, 400), res);
+    return;
   }
   user.logedIn = false;
   user.save();
