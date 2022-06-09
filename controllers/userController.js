@@ -102,11 +102,9 @@ exports.resetPassword = catchAsync(async function (req, res, next) {
     return;
   }
 
-  if (user && new Date(+Date.now()) < +user.passwordResetExpires) {
-    res.status(302).json({
-      message: 'Please insert a new password in the highlighted field',
-    });
-  }
+  res.status(302).json({
+    message: 'Please insert a new password in the highlighted field',
+  });
 });
 
 exports.passwordRedefined = catchAsync(async (req, res, next) => {
