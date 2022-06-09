@@ -46,13 +46,19 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const email = req.body.email;
-  const user = await User.findOne({ email: email });
+  let user = undefined;
+  try {
+    user = await User.findOne({ where: { email: email } });
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
   if (!user) {
-    errorController(new AppError('No user with that email!', 401));
+    errorController(new AppError('No user with that email!', 401), res);
     return;
   }
   if (!user.active) {
-    errorController(new AppError('Your profile is not activated!', 400));
+    errorController(new AppError('Your profile is not activated!', 400), res);
     return;
   }
   const key = user.username;
@@ -60,17 +66,22 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const url = `${req.protocol}://${req.get('host')}/resetPassword/${token}`;
   user.passwordResetToken = token;
   user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
-  if (await user.save()) {
+  console.log(user.email, ' asdasd');
+  try {
+    await user.save();
     sendEmail({
       email: user.email,
       subject: 'Password reset',
       message: `To reset your password, please click the link within the next 10 minutes.
         \n${url}`,
     });
-    res.status(200).json({
-      message: 'Email has been sent. Check your inbox for password recovery instructions.',
-    });
+  } catch (err) {
+    errorController(new AppError(`Request failed! Try again later.`, 503), res);
+    return;
   }
+  res.status(200).json({
+    message: 'Email has been sent. Check your inbox for password recovery instructions.',
+  });
 });
 
 exports.resetPassword = catchAsync(async function (req, res, next) {
