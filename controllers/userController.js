@@ -110,7 +110,13 @@ exports.resetPassword = catchAsync(async function (req, res, next) {
 });
 
 exports.passwordRedefined = catchAsync(async (req, res, next) => {
-  const user = await User.findByPk(req.params.username);
+  let user = undefined;
+  try {
+    user = await User.findByPk(req.params.username);
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
   if (!user.passwordResetToken || !user.passwordResetExpires) {
     errorController(new AppError(`You don't have a password reset request!`, 403));
     return;
@@ -118,9 +124,13 @@ exports.passwordRedefined = catchAsync(async (req, res, next) => {
   user.password = req.body.newPassword;
   user.passwordResetToken = null;
   user.passwordResetExpires = null;
-  if (user.save()) {
-    res.status(200).json({
-      message: `${req.params.username}, your password has been redefined successfully.`,
-    });
+  try {
+    await user.save();
+  } catch (err) {
+    errorController(new AppError(`Change password failed! Please retry later.`, 503), res);
+    return;
   }
+  res.status(200).json({
+    message: `${req.params.username}, your password has been redefined successfully.`,
+  });
 });
