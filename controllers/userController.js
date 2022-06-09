@@ -85,7 +85,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async function (req, res, next) {
-  const user = await User.findOne({ passwordResetToken: req.params.token });
+  let user = undefined;
+  try {
+    user = await User.findOne({ where: { passwordResetToken: req.params.token } });
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
 
   if (!user) {
     errorController(new AppError(`No user found, something wen't wrong!`, 404));
