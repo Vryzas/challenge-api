@@ -33,8 +33,13 @@ exports.signup = catchAsync(async (req, res, next) => {
 
 exports.login = catchAsync(async (req, res, next) => {
   const { username, password } = req.body;
-  const user = await User.findByPk(username);
-
+  let user = undefined;
+  try {
+    user = await User.findByPk(username);
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
   if (!user) {
     errorController(new AppError(`Wrong username!`, 400), res);
     return;
@@ -45,7 +50,12 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   user.logedIn = true;
-  user.save();
+  try {
+    user.save();
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
   res.status(200).json({
     message: 'Login successful.',
     data: { username: user.username, email: user.email },
@@ -53,7 +63,13 @@ exports.login = catchAsync(async (req, res, next) => {
 });
 
 exports.logout = catchAsync(async function (req, res, next) {
-  const user = await User.findByPk(req.params.username);
+  let user = undefined;
+  try {
+    user = await User.findByPk(req.params.username);
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
   if (!user) {
     errorController(new AppError('No user with this username!', 400), res);
     return;
@@ -62,7 +78,13 @@ exports.logout = catchAsync(async function (req, res, next) {
     errorController(new AppError(`This user isn't logged in!`, 400), res);
     return;
   }
+
   user.logedIn = false;
-  user.save();
+  try {
+    user.save();
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
   res.status(200).json({ message: 'Logout successful.' });
 });
