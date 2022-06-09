@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "@jest-mock/express": "^1.4.5",
-    "jest": "^28.1.0"
+    "jest": "^28.1.0",
+    "sequelize-mock": "^0.10.2"
   }
 }
