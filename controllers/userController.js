@@ -18,19 +18,30 @@ exports.getMyMatches = catchAsync(async function (req, res, next) {
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
-  const user = await User.findByPk(req.params.username);
+  let user = undefined;
+  try {
+    user = await User.findByPk(req.params.username);
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
+  // const user = await User.findByPk(req.params.username);
   if (!user) {
-    errorController(new AppError('Wrong username!', 401));
+    errorController(new AppError('Wrong username!', 401), res);
     return;
   }
   if (user.active) {
-    errorController(new AppError('User is already activated!', 400));
+    errorController(new AppError('User is already activated!', 400), res);
     return;
   }
   user.active = true;
-  if (await user.save()) {
-    res.status(200).json({ message: 'Your account has been activated successfully.' });
+  try {
+    await user.save();
+  } catch (err) {
+    errorController(new AppError(`Account activation failed! Please retry later.`, 503), res);
+    return;
   }
+  res.status(200).json({ message: 'Your account has been activated successfully.' });
 });
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
