@@ -13,6 +13,6 @@ router.get('/activation/:token', userController.activateAccount);
 router.patch('/forgotPassword', userController.forgotPassword);
 router.get('/resetPassword/:token', userController.resetPassword);
 router.patch('/changePassword', userController.passwordRedefined);
-router.get('/profile', userController.getMe);
+router.get('/profile/:username?', userController.getMe);
 
 module.exports = router;
