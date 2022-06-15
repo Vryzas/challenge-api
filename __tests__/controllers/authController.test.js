@@ -106,3 +106,38 @@ describe('Login - ', () => {
     });
   });
 });
+
+describe('Logout', () => {
+  test('Invalid username.', async () => {
+    // arrange
+    const req = getMockReq({ params: { username: '' } });
+    dao.findUser.mockReturnValue(null);
+    // act
+    await authController.logout(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('Invalid state.', async () => {
+    // arrange
+    const req = getMockReq({ params: { username: 'username' } });
+    dao.findUser.mockReturnValue((user = { username: 'username', logedIn: false }));
+    // act
+    await authController.logout(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('Valid username and valid state.', async () => {
+    // arrange
+    const req = getMockReq({ params: { username: 'username' } });
+    dao.findUser.mockReturnValue((user = { username: 'username', logedIn: true }));
+    // act
+    await authController.logout(req, res, next);
+    // assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: 'Logout successful.',
+    });
+  });
+});
