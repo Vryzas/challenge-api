@@ -1,4 +1,4 @@
-const User = require('./../models/userModel');
+const dao = require('./../dao/userDao');
 const sendEmail = require('./../utils/email');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -11,15 +11,15 @@ exports.signup = catchAsync(async (req, res, next) => {
   }
   const key = username;
   const token = jwt.sign({ key }, process.env.JWT_SECRET);
-  const newUser = await User.create({
+  await dao.create({
     username: username,
     email: email,
     password: password,
     passwordResetToken: token,
   });
-  const url = `${req.protocol}://${req.get('host')}/activation/${newUser.passwordResetToken}`;
+  const url = `${req.protocol}://${req.get('host')}/user/activation/${token}`;
   sendEmail({
-    email: newUser.email,
+    email: email,
     subject: 'Your profile has been created',
     message: `Please click the link to activate your account. 
       If you haven't created a profile please ignore this message.
@@ -35,8 +35,7 @@ exports.login = async (req, res, next) => {
   if (!username || !password) {
     return res.status(400).json({ message: 'Please provide username and password!' });
   }
-
-  const user = await User.findByPk(username);
+  const user = await dao.findUser(username);
   if (!user) {
     return next(new AppError(`Wrong username!`, 400));
   }
@@ -44,7 +43,7 @@ exports.login = async (req, res, next) => {
     return next(new AppError(`Wrong password!`, 400));
   }
   user.logedIn = true;
-  user.save();
+  dao.save(user);
   return res.status(200).json({
     message: 'Login successful.',
     data: { username: user.username, email: user.email },
@@ -52,7 +51,7 @@ exports.login = async (req, res, next) => {
 };
 
 exports.logout = catchAsync(async function (req, res, next) {
-  const user = await User.findByPk(req.params.username);
+  const user = await dao.findUser(req.params.username);
   if (!user) {
     return next(new AppError('No user with this username!', 400));
   }
@@ -60,6 +59,6 @@ exports.logout = catchAsync(async function (req, res, next) {
     return next(new AppError(`This user isn't logged in!`, 400));
   }
   user.logedIn = false;
-  user.save();
+  dao.save(user);
   return res.status(200).json({ message: 'Logout successful.' });
 });
