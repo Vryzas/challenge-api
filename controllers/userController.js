@@ -1,16 +1,12 @@
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
-const User = require('./../models/userModel');
+const dao = require('./../dao/userDao');
 const Stat = require(`./../models/statsModel`);
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
-const axios = require('axios');
-const { sequelize } = require('./../models/userModel');
 
 exports.getMe = catchAsync(async function (req, res, next) {
-  const [userProfile, metadata] = await sequelize.query(
-    `SELECT u.username, u.email, s.victories, s.draws, s.defeats FROM Users u, Stats s WHERE u.username='${req.query.username}';`
-  );
+  const userProfile = await dao.profile(req.query.username);
   if (userProfile.length === 0) {
     return res.status(404).json({ message: `Failed to get ${req.query.username} profile data!` });
   }
@@ -18,20 +14,20 @@ exports.getMe = catchAsync(async function (req, res, next) {
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
-  const user = await User.findOne({ where: { passwordResetToken: req.params.token } });
+  const user = await dao.findByParam(req.params.token);
   if (!user) {
     return next(new AppError(`This token isn't valid!`, 401));
   }
   user.active = true;
   user.passwordResetToken = null;
-  if (await user.save()) {
+  if (await dao.save(user)) {
     await Stat.create({ username: user.username });
     return res.status(200).json({ message: 'Your account has been activated successfully.' });
   }
 });
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  const user = await User.findOne({ where: { email: req.body.email } });
+  const user = await dao.findByParam(req.body.email);
   if (!user) {
     return next(new AppError('No user with that email!', 401));
   }
@@ -43,7 +39,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const url = `${req.protocol}://${req.get('host')}/resetPassword/${token}`;
   user.passwordResetToken = token;
   user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
-  if (await user.save()) {
+  if (await dao.save(user)) {
     sendEmail({
       email: user.email,
       subject: 'Password reset',
@@ -57,11 +53,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async function (req, res, next) {
-  const user = await User.findOne({
-    where: { passwordResetToken: req.params.token },
-  });
+  const user = await dao.findByParam(req.params.token);
   if (!user || new Date(+Date.now()) > +user.passwordResetExpires) {
-    console.log(user);
     return next(new AppError('Your password reset link has expired!', 403));
   }
 
@@ -73,14 +66,14 @@ exports.resetPassword = catchAsync(async function (req, res, next) {
 });
 
 exports.passwordRedefined = catchAsync(async (req, res, next) => {
-  const user = await User.findByPk(req.body.username);
+  const user = await dao.findUser(req.body.username);
   if (!user.passwordResetToken || !user.passwordResetExpires) {
     return next(new AppError(`You don't have a password reset request!`, 403));
   }
   user.password = req.body.newPassword;
   user.passwordResetToken = null;
   user.passwordResetExpires = null;
-  if (user.save()) {
+  if (dao.save(user)) {
     return res.status(200).json({
       message: `${req.body.username}, your password has been redefined successfully.`,
     });
