@@ -37,3 +37,72 @@ describe('Signup', () => {
     });
   });
 });
+
+describe('Login - ', () => {
+  // TODO
+  /*beforeEach(() => {
+    jest.clearAllMocks();
+  });*/
+  // afterEach(() => {
+  //   clearMockRes();
+  // });
+
+  test('No parameters.', async () => {
+    // arrange
+    const req = getMockReq();
+    // act
+    await authController.login(req, res, next);
+    // assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Please provide username and password!' });
+  });
+
+  test('Invalid username.', async () => {
+    // arrange
+    const req = getMockReq({ body: { username: 'wrong username', password: 'password' } });
+    dao.findUser.mockReturnValue(null);
+    // act
+    await authController.login(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('Database Error', async () => {
+    // arrange
+    const req = getMockReq({ body: { username: 'username', password: 'password' } });
+    dao.findUser.mockRejectedValue('DatabaseConnectionError');
+    // act
+    const response = authController.login(req, res, next);
+    // assert
+    expect(response).rejects.toMatch('DatabaseConnectionError');
+  });
+
+  test('Invalid password.', async () => {
+    // arrange
+    const req = getMockReq({ body: { username: 'username', password: 'wrongPassword' } });
+    dao.findUser.mockReturnValue((user = { username: 'username', password: 'password' }));
+    // act
+    await authController.login(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('Valid username and password.', async () => {
+    // arrange
+    const req = getMockReq({ body: { username: 'username', password: 'password' } });
+    dao.findUser.mockReturnValue(
+      (user = { username: 'username', password: 'password', email: 'email', logedIn: true })
+    );
+    // act
+    await authController.login(req, res, next);
+    // assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: 'Login successful.',
+      data: {
+        email: 'email',
+        username: 'username',
+      },
+    });
+  });
+});
