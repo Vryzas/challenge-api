@@ -1,13 +1,12 @@
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const dao = require('./../dao/userDao');
-const Stat = require(`./../models/statsModel`);
+const stats = require('./../dao/statsDao');
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
 
 exports.getMe = catchAsync(async function (req, res, next) {
   const userProfile = await dao.profile(req.query.username);
-  console.log(userProfile);
   if (!userProfile) {
     return res.status(404).json({ message: `Failed to get ${req.query.username} profile data!` });
   }
@@ -22,7 +21,7 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
   user.active = true;
   user.passwordResetToken = null;
   if (await dao.save(user)) {
-    await Stat.create({ username: user.username });
+    await stats.create({ username: user.username });
     return res.status(200).json({ message: 'Your account has been activated successfully.' });
   }
 });
