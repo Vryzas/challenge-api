@@ -5,25 +5,27 @@ const emailVal = (email) => {
 };
 
 exports.signupFields = (req, res, next) => {
+  let valid = true;
   let ret = {};
   if (!req.body.username) {
     ret.message = `No username provided!`;
     ret.status = 400;
+    valid = false;
   } else if (!req.body.email) {
     ret.message = 'No email provided!';
     ret.status = 400;
+    valid = false;
   } else if (!emailVal(req.body.email)) {
     ret.message = 'Invalid email!';
     ret.status = 400;
+    valid = false;
   } else if (!req.body.password) {
     ret.message = 'No password provided!';
     ret.status = 400;
-  } else {
-    ret.message = ``;
-    ret.status = 200;
+    valid = false;
   }
 
-  if (ret.status === 200) {
+  if (valid) {
     next();
   } else {
     res.status(ret.status).json({ message: ret.message });
