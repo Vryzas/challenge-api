@@ -7,10 +7,11 @@ const jwt = require('jsonwebtoken');
 
 exports.getMe = catchAsync(async function (req, res, next) {
   const userProfile = await dao.profile(req.query.username);
-  if (userProfile.length === 0) {
+  console.log(userProfile);
+  if (!userProfile) {
     return res.status(404).json({ message: `Failed to get ${req.query.username} profile data!` });
   }
-  return res.status(200).json({ profile: userProfile[0] });
+  return res.status(200).json({ message: 'Success.', data: userProfile });
 });
 
 exports.activateAccount = catchAsync(async (req, res, next) => {
@@ -70,7 +71,7 @@ exports.passwordRedefined = catchAsync(async (req, res, next) => {
   if (!user.passwordResetToken || !user.passwordResetExpires) {
     return next(new AppError(`You don't have a password reset request!`, 403));
   }
-  user.password = req.body.newPassword;
+  user.password = encrypter(req.body.newPassword);
   user.passwordResetToken = null;
   user.passwordResetExpires = null;
   if (dao.save(user)) {
