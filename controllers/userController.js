@@ -25,7 +25,7 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
     errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
     return;
   }
-  // const user = await User.findByPk(req.params.username);
+
   if (!user) {
     errorController(new AppError('Wrong username!', 401), res);
     return;
@@ -66,7 +66,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const url = `${req.protocol}://${req.get('host')}/resetPassword/${token}`;
   user.passwordResetToken = token;
   user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
-  console.log(user.email, ' asdasd');
   try {
     await user.save();
     sendEmail({
