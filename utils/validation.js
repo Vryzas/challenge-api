@@ -33,18 +33,18 @@ exports.signupFields = (req, res, next) => {
 };
 
 exports.loginFields = (req, res, next) => {
-  let check = false;
+  let valid = true;
   const ret = {};
   if (!req.body.username) {
     ret.message = 'No username provided!';
     ret.status = 400;
-    check = true;
+    valid = false;
   } else if (!req.body.password) {
     ret.message = 'No password provided!';
     ret.status = 400;
-    check = true;
+    valid = false;
   }
-  if (!check) {
+  if (valid) {
     next();
   } else {
     res.status(ret.status).json({ message: ret.message });
