@@ -1,7 +1,6 @@
 const authController = require('../../controllers/authController');
 const { getMockReq, getMockRes } = require('@jest-mock/express');
 const { res, next, clearMockRes } = getMockRes();
-// const req = getMockReq();
 
 jest.mock('jsonwebtoken');
 jest.mock('../../utils/appError');
@@ -39,14 +38,6 @@ describe('Signup', () => {
 });
 
 describe('Login - ', () => {
-  // TODO
-  /*beforeEach(() => {
-    jest.clearAllMocks();
-  });*/
-  // afterEach(() => {
-  //   clearMockRes();
-  // });
-
   test('No parameters.', async () => {
     // arrange
     const req = getMockReq();
