@@ -20,10 +20,9 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
   }
   user.active = true;
   user.passwordResetToken = null;
-  if (await dao.save(user)) {
-    await stats.create({ username: user.username });
-    return res.status(200).json({ message: 'Your account has been activated successfully.' });
-  }
+  dao.save(user);
+  stats.create({ username: user.username });
+  return res.status(200).json({ message: 'Your account has been activated successfully.' });
 });
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
@@ -36,20 +35,19 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
   const key = user.username;
   const token = jwt.sign({ key }, process.env.JWT_SECRET);
-  const url = `${req.protocol}://${req.get('host')}/resetPassword/${token}`;
+  const url = `${req.protocol}://${req.get('host')}/user/resetPassword/${token}`;
   user.passwordResetToken = token;
   user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
-  if (await dao.save(user)) {
-    sendEmail({
-      email: user.email,
-      subject: 'Password reset',
-      message: `To reset your password, please click the link within the next 10 minutes.
+  dao.save(user);
+  sendEmail({
+    email: user.email,
+    subject: 'Password reset',
+    message: `To reset your password, please click the link within the next 10 minutes.
         \n${url}`,
-    });
-    return res.status(200).json({
-      message: 'Email has been sent. Check your inbox for password recovery instructions.',
-    });
-  }
+  });
+  return res.status(200).json({
+    message: 'Email has been sent. Check your inbox for password recovery instructions.',
+  });
 });
 
 exports.resetPassword = catchAsync(async function (req, res, next) {
@@ -73,9 +71,8 @@ exports.passwordRedefined = catchAsync(async (req, res, next) => {
   user.password = encrypter(req.body.newPassword);
   user.passwordResetToken = null;
   user.passwordResetExpires = null;
-  if (dao.save(user)) {
-    return res.status(200).json({
-      message: `${req.body.username}, your password has been redefined successfully.`,
-    });
-  }
+  dao.save(user);
+  return res.status(200).json({
+    message: `${req.body.username}, your password has been redefined successfully.`,
+  });
 });
