@@ -145,10 +145,44 @@ describe('resetPassword', () => {
     // act
     await userController.resetPassword(req, res, next);
     // assert
-    // expect(next).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(302);
     expect(res.json).toHaveBeenCalledWith({
       message: 'Please insert a new password in the highlighted field.',
+    });
+  });
+});
+
+describe('passwordRedefined', () => {
+  test('No token.', async () => {
+    // arrange
+    const req = getMockReq({ body: { username: 'username' } });
+    dao.findUser.mockReturnValue({ username: 'username', passwordResetToken: null, passwordResetExpires: null });
+    // act
+    await userController.passwordRedefined(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('Invalid token.', async () => {
+    // arrange
+    const req = getMockReq({ body: { username: 'username' } });
+    dao.findUser.mockReturnValue({ username: 'username', passwordResetToken: true, passwordResetExpires: null });
+    // act
+    await userController.passwordRedefined(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('Valid token.', async () => {
+    // arrange
+    const req = getMockReq({ body: { username: 'username' } });
+    dao.findUser.mockReturnValue({ username: 'username', passwordResetToken: true, passwordResetExpires: true });
+    // act
+    await userController.passwordRedefined(req, res, next);
+    // assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: `${req.body.username}, your password has been redefined successfully.`,
     });
   });
 });
