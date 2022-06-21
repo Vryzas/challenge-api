@@ -19,13 +19,22 @@ exports.signup = catchAsync(async (req, res, next) => {
     return;
   }
   const url = `${req.protocol}://${req.get('host')}/user/activation/${newUser.username}`;
-  sendEmail({
-    email: newUser.email,
-    subject: 'Your profile has been created',
-    message: `Please click the link to activate your account. 
+  try {
+    await sendEmail({
+      email: newUser.email,
+      subject: 'Your profile has been created',
+      message: `Please click the link to activate your account. 
       If you haven't created a profile please ignore this message.
       \n${url}`,
-  });
+    });
+  } catch (error) {
+    await User.destroy({ where: { username: username } });
+    res.status(503).json({
+      message: `Something wen't wrong while sending your activation email!
+    Please check your inserted email and retry to create your profile.`,
+    });
+    return;
+  }
   res.status(201).json({
     message: 'Your profile has been created, please check your email for the activation message.',
   });
