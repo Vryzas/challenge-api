@@ -16,6 +16,7 @@ afterEach(() => {
   // clear the responses after each test (else they accumulate)
   clearMockRes();
 });
+
 describe('getMe', () => {
   test('Invalid username.', async () => {
     // arrange
@@ -66,7 +67,6 @@ describe('activateAccount', () => {
     expect(next).toHaveBeenCalled();
   });
 
-  // TODO
   test('Valid token.', async () => {
     // arrange
     const req = getMockReq({ params: { token: 'token' } });
@@ -78,5 +78,41 @@ describe('activateAccount', () => {
     // assert
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ message: 'Your account has been activated successfully.' });
+  });
+});
+
+describe('forgotPassword', () => {
+  test('Invalid email.', async () => {
+    // arrange
+    const req = getMockReq({ body: { email: 'wrongEmail' } });
+    dao.findByParam.mockReturnValue(undefined);
+    // act
+    await userController.forgotPassword(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('User profile not activated.', async () => {
+    // arrange
+    const req = getMockReq({ body: { email: 'email' } });
+    dao.findByParam.mockReturnValue({ username: 'username', active: false });
+    // act
+    await userController.forgotPassword(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('Valid profile.', async () => {
+    // arrange
+    const req = getMockReq({ body: { email: 'email', token: 'token' } });
+    dao.findByParam.mockReturnValue({ username: 'username', active: true });
+    dao.save.mockReturnValue(true);
+    // act
+    await userController.forgotPassword(req, res, next);
+    // assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: 'Email has been sent. Check your inbox for password recovery instructions.',
+    });
   });
 });
