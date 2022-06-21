@@ -44,6 +44,7 @@ exports.loginFields = (req, res, next) => {
     ret.status = 400;
     valid = false;
   }
+
   if (valid) {
     next();
   } else {
