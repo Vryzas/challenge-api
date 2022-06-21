@@ -116,3 +116,39 @@ describe('forgotPassword', () => {
     });
   });
 });
+
+describe('resetPassword', () => {
+  test('Altered or used token.', async () => {
+    // arrange
+    const req = getMockReq({ params: { token: 'badToken' } });
+    dao.findByParam.mockReturnValue(null);
+    // act
+    await userController.resetPassword(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('Expired token.', async () => {
+    // arrange
+    const req = getMockReq({ params: { token: 'expiredToken' } });
+    dao.findByParam.mockReturnValue({ passwordResetExpires: new Date(+Date.now()) - 1000 });
+    // act
+    await userController.resetPassword(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('Valid token.', async () => {
+    // arrange
+    const req = getMockReq({ params: { token: 'token' } });
+    dao.findByParam.mockReturnValue({ passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000) });
+    // act
+    await userController.resetPassword(req, res, next);
+    // assert
+    // expect(next).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(302);
+    expect(res.json).toHaveBeenCalledWith({
+      message: 'Please insert a new password in the highlighted field.',
+    });
+  });
+});
