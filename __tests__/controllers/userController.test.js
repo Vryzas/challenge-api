@@ -54,3 +54,29 @@ describe('getMe', () => {
     });
   });
 });
+
+describe('activateAccount', () => {
+  test('Invalid token.', async () => {
+    // arrange
+    const req = getMockReq({ params: { token: 'badToken' } });
+    dao.findByParam.mockReturnValue(undefined);
+    // act
+    await userController.activateAccount(req, res, next);
+    // assert
+    expect(next).toHaveBeenCalled();
+  });
+
+  // TODO
+  test('Valid token.', async () => {
+    // arrange
+    const req = getMockReq({ params: { token: 'token' } });
+    dao.findByParam.mockReturnValue({ user: { username: 'username' } });
+    stats.create.mockReturnValue(true);
+    await dao.save.mockReturnValue(true);
+    // act
+    await userController.activateAccount(req, res, next);
+    // assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Your account has been activated successfully.' });
+  });
+});
