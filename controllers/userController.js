@@ -68,7 +68,7 @@ exports.passwordRedefined = catchAsync(async (req, res, next) => {
   if (!user.passwordResetToken || !user.passwordResetExpires) {
     return next(new AppError(`You don't have a password reset request!`, 403));
   }
-  user.password = encrypter(req.body.newPassword);
+  user.password = req.body.newPassword;
   user.passwordResetToken = null;
   user.passwordResetExpires = null;
   dao.save(user);
