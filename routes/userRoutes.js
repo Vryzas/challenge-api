@@ -6,13 +6,13 @@ const userController = require('./../controllers/userController');
 const router = express.Router();
 
 router.post('/signup', authController.signup);
-router.get('/login', authController.login);
+router.post('/login', authController.login);
 router.get('/logout/:username', authController.logout);
 
-router.patch('/activateMe/:username', userController.activateAccount);
+router.get('/activation/:token', userController.activateAccount);
 router.patch('/forgotPassword', userController.forgotPassword);
 router.get('/resetPassword/:token', userController.resetPassword);
-router.patch('/passwordRedefined/:username', userController.passwordRedefined);
-router.get('/getMe', userController.getMe);
+router.patch('/changePassword', userController.passwordRedefined);
+router.get('/profile', userController.getMe);
 
 module.exports = router;
