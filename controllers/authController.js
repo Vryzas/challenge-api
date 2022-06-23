@@ -1,14 +1,25 @@
 const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
+const catchAsync = require('./../utils/catchAsync');
+const errorController = require('./../controllers/errorController');
+const AppError = require('./../utils/appError');
 
-exports.signup = async (req, res, next) => {
+exports.signup = catchAsync(async (req, res, next) => {
+  let { username, email, password } = req.body;
+  let newUser;
   try {
-    const newUser = await User.create({
-      username: req.body.username,
-      email: req.body.email,
-      password: req.body.password,
+    newUser = await User.create({
+      username: username,
+      email: email,
+      password: password,
     });
-    const url = `${req.protocol}://${req.get('host')}/activateMe/${newUser.username}`;
+  } catch (error) {
+    const val = error.fields.email ? `email` : `username`;
+    res.status(401).json({ message: `There's already a user with that ${val} registered on this server!` });
+    return;
+  }
+  const url = `${req.protocol}://${req.get('host')}/user/activation/${newUser.username}`;
+  try {
     await sendEmail({
       email: newUser.email,
       subject: 'Your profile has been created',
@@ -16,51 +27,73 @@ exports.signup = async (req, res, next) => {
       If you haven't created a profile please ignore this message.
       \n${url}`,
     });
-    return res.status(201).json({
-      message: 'Your profile has been created, please check your email for the activation message.',
+  } catch (error) {
+    await User.destroy({ where: { username: username } });
+    res.status(503).json({
+      message: `Something wen't wrong while sending your activation email!
+    Please check your inserted email and retry to create your profile.`,
     });
-  } catch (err) {
-    return res.status(500).json({ message: 'Something went wrong!' });
+    return;
   }
-};
+  res.status(201).json({
+    message: 'Your profile has been created, please check your email for the activation message.',
+  });
+});
 
-exports.login = async (req, res, next) => {
+exports.login = catchAsync(async (req, res, next) => {
+  const { username, password } = req.body;
+  let user = undefined;
   try {
-    const { username, password } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Please provide username and password!' });
-    }
-
-    const user = await User.findByPk(username);
-    if (!user) {
-      return res.status(401).json({ message: 'Wrong username!' });
-    }
-    if (password !== user.password) {
-      return res.status(401).json({ message: 'Wrong password!' });
-    }
-    if (user.loggedIn) {
-      return res.status(400).json({ message: 'User already logged in' });
-    }
-    user.loggedIn = true;
-    user.save();
-    return res.status(200).json({
-      message: 'Login successful.',
-      data: { username: user.username, email: user.email },
-    });
+    user = await User.findByPk(username);
   } catch (err) {
-    return res.status(500).json({ message: 'Something went wrong!' });
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
   }
-};
-
-exports.logout = async function (req, res, next) {
-  const user = await User.findByPk(req.params.username);
   if (!user) {
-    return res.status(500).json({ message: 'Something went wrong!' });
+    errorController(new AppError(`Wrong username!`, 400), res);
+    return;
+  }
+  if (password !== user.password) {
+    errorController(new AppError(`Wrong password!`, 400), res);
+    return;
+  }
+
+  user.loggedIn = true;
+  try {
+    user.save();
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
+  res.status(200).json({
+    message: 'Login successful.',
+    data: { username: user.username, email: user.email },
+  });
+});
+
+exports.logout = catchAsync(async function (req, res, next) {
+  let user = undefined;
+  try {
+    user = await User.findByPk(req.params.username);
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
+  if (!user) {
+    errorController(new AppError('No user with this username!', 400), res);
+    return;
   }
   if (!user.loggedIn) {
-    return res.status(500).json({ message: `This user isn't logged in!` });
+    errorController(new AppError(`This user isn't logged in!`, 400), res);
+    return;
   }
+
   user.loggedIn = false;
-  user.save();
-  return res.status(200).json({ message: 'Logout successful.' });
-};
+  try {
+    user.save();
+  } catch (err) {
+    errorController(new AppError(`Could not complete your request at this moment!`, 503), res);
+    return;
+  }
+  res.status(200).json({ message: 'Logout successful.' });
+});

@@ -1,25 +1,41 @@
+const catchAsync = require('./../utils/catchAsync');
 const axios = require('axios');
 
-chessStats = async (req, res, type) => {
+chessStats = catchAsync(async (req, res, type) => {
+  console.log(type);
   const player = req.params.player_id;
   let status;
   let message;
   await axios
     .get(process.env.CHESS_API + `${player}/` + type)
     .then((response) => {
-      status = response.status;
-      message = response.data.fide || Object.keys(response.data.games).length;
+      if (type === `stats`) {
+        if (!response.data.fide) {
+          // if a player exists but has no fide score
+          status = 404;
+          message = 'No FIDE score for that player found!';
+        } else {
+          status = 200;
+          message = response.data.fide;
+        }
+      } else if (type === `games/2022/04`) {
+        if (response.data.games.length <= 0) {
+          // if player has no games played in that period
+          status = 404;
+          message = 'No games found for that player!';
+        } else {
+          status = 200;
+          message = response.data.games.length;
+        }
+      }
     })
     .catch((error) => {
-      console.log(error);
-      return (
-        (status = 500),
-        (message = `There has been an error or that player doesn't exist!`)
-      );
+      status = 404;
+      message = 'No player with that id found!';
     });
-  return await res.status(status).json({
+  await res.status(status).json({
     message: message,
   });
-};
+});
 
 module.exports = chessStats;

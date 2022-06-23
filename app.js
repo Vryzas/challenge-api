@@ -8,14 +8,12 @@ const cors = require('cors');
 
 const sequelize = require('./utils/dbconnection');
 const AppError = require('./utils/appError');
-const globalErrorHandler = require('./controllers/errorController');
+const errorController = require('./controllers/errorController');
 
-const sequelize = require('./utils/dbconnection');
 const userRouter = require('./routes/userRoutes');
 const statsRouter = require('./routes/statsRoutes');
 const matchesRouter = require('./routes/matchRoutes');
 const chessRouter = require('./routes/chessRoutes');
-
 // Start express app
 const app = express();
 
@@ -61,7 +59,11 @@ app.use('/matches', matchesRouter);
 app.use('/chess', chessRouter);
 
 app.all('*', (req, res, next) => {
-  globalErrorHandler(new AppError(404, `Can't find ${req.originalUrl} on this server!`), req, res, next);
+  errorController(new AppError(`Can't find ${req.originalUrl} on this server!`, 404), res);
 });
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(errorController);
+}
 
 module.exports = app;
