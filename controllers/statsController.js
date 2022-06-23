@@ -7,7 +7,9 @@ exports.findStats = catchAsync(async (req, res, next) => {
   }
   const userStats = await Stat.findByPk(req.params.username);
   if (!userStats) {
-    return res.status(404).json({ message: `No player with that name found!` });
+    return res.status(404).json({
+      message: `No player with username ${req.params.username} found!`,
+    });
   }
   return res.status(200).json({
     message: userStats,
