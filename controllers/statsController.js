@@ -45,3 +45,13 @@ exports.compareStats = catchAsync(async (req, res, next) => {
     message: stats,
   });
 });
+
+exports.leaderboard = catchAsync(async (req, res, next) => {
+  let leaderboard;
+  try {
+    leaderboard = await Stat.sequelize.query(`SELECT * FROM Stats s ORDER BY s.victories LIMIT 100`);
+  } catch (err) {
+    res.satus(503).json({ message: `Could not complete your request at this moment, please try again later.` });
+  }
+  res.status(200).json({ message: `The Leaderboard`, data: leaderboard });
+});
