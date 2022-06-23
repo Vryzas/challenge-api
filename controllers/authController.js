@@ -58,7 +58,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return;
   }
 
-  user.logedIn = true;
+  user.loggedIn = true;
   try {
     user.save();
   } catch (err) {
@@ -83,12 +83,12 @@ exports.logout = catchAsync(async function (req, res, next) {
     errorController(new AppError('No user with this username!', 400), res);
     return;
   }
-  if (!user.logedIn) {
+  if (!user.loggedIn) {
     errorController(new AppError(`This user isn't logged in!`, 400), res);
     return;
   }
 
-  user.logedIn = false;
+  user.loggedIn = false;
   try {
     user.save();
   } catch (err) {

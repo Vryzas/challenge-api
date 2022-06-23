@@ -1,21 +1,32 @@
+const User = require(`./../models/userModel`);
 const catchAsync = require('./../utils/catchAsync');
 
-exports.playerMatches = catchAsync(async function (req, res, next) {
-  const player = req.params.username;
+exports.player = catchAsync(async function (req, res, next) {
+  const player = await User.findByPk(req.params.username);
+  if (!player) {
+    return res.status(404).json({
+      message: `${req.params.username} does not exist!`,
+    });
+  }
   res.status(501).json({
     message: `Find matches for ${player} is still to be impemented.`,
   });
 });
 
-exports.compareMatches = catchAsync(async function (req, res, next) {
-  const compareTo = req.params.compareTo;
-  const me = req.body.username;
+exports.compare = catchAsync(async function (req, res, next) {
+  const user1 = await User.findByPk(req.body.username1);
+  const user2 = await User.findByPk(req.body.username2);
+  if (!user1 || !user2) {
+    return res.status(404).json({
+      message: `One or both of these users do not exist!`,
+    });
+  }
   res.status(501).json({
-    message: `Compare matches between ${me} and ${compareTo} is still to be impemented.`,
+    message: `Compare matches between ${user1.dataValues.username} and ${user2.dataValues.username} is still to be impemented.`,
   });
 });
 
-exports.addMatch = catchAsync(async function (req, res, next) {
+exports.newMatch = catchAsync(async function (req, res, next) {
   const game = req.body.game;
   const username1 = req.body.username1;
   const username2 = req.body.username2;

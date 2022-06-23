@@ -1,34 +1,34 @@
+const AppError = require('./../utils/appError');
+
 const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
+  res.status(err.status).json({
     message: err.message,
     stack: err.stack,
   });
 };
 
+// production errors can be foressen and handled explicitly with a specific msg or, unforeseen and handled generically
 const sendErrorProd = (err, res) => {
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
-      status: err.status,
+  if (err instanceof AppError) {
+    // instances of AppError are foreseen (ie:server connection failure, invalid user input, request timeout, etc.)
+    res.status(err.status).json({
       message: err.message,
     });
   } else {
+    // generic handler (for programmer related errors/bugs)
     console.error('ERROR', err);
     res.status(500).json({
-      status: 'error',
       message: 'Something went wrong!',
+      status: 'error',
     });
   }
 };
 
+// allows for development/production differenciated error handling
 module.exports = (err, res) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    let error = { ...err };
-    sendErrorProd(error, res);
+    sendErrorProd(err, res);
   }
 };

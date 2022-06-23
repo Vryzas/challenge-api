@@ -27,7 +27,7 @@ User.init(
     },
     passwordResetToken: DataTypes.STRING,
     passwordResetExpires: DataTypes.DATE,
-    logedIn: DataTypes.BOOLEAN,
+    loggedIn: DataTypes.BOOLEAN,
   },
   {
     sequelize,

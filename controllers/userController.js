@@ -5,19 +5,19 @@ const User = require('./../models/userModel');
 const sendEmail = require('./../utils/email');
 const jwt = require('jsonwebtoken');
 
-exports.getMe = catchAsync(async function (req, res, next) {
+exports.profile = catchAsync(async function (req, res, next) {
   errorController(new AppError('Get my data is still to be impemented.', 501), res);
 });
 
-exports.getMyStats = catchAsync(async function (req, res, next) {
+exports.stats = catchAsync(async function (req, res, next) {
   errorController(new AppError('Get my statistics is still to be impemented.', 501), res);
 });
 
-exports.getMyMatches = catchAsync(async function (req, res, next) {
+exports.matches = catchAsync(async function (req, res, next) {
   errorController(new AppError('Get my matches is still to be impemented.', 501), res);
 });
 
-exports.activateAccount = catchAsync(async (req, res, next) => {
+exports.activate = catchAsync(async (req, res, next) => {
   let user = undefined;
   try {
     user = await User.findByPk(req.params.username);
@@ -34,9 +34,10 @@ exports.activateAccount = catchAsync(async (req, res, next) => {
     errorController(new AppError('User is already activated!', 400), res);
     return;
   }
+
   user.active = true;
   try {
-    await user.save();
+    user.save();
   } catch (err) {
     errorController(new AppError(`Account activation failed! Please retry later.`, 503), res);
     return;
@@ -63,7 +64,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
   const key = user.username;
   const token = jwt.sign({ key }, process.env.JWT_SECRET);
-  const url = `${req.protocol}://${req.get('host')}/resetPassword/${token}`;
+  const url = `${req.protocol}://${req.get('host')}/user/resetPassword/${token}`;
   user.passwordResetToken = token;
   user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
   try {
@@ -106,7 +107,7 @@ exports.resetPassword = catchAsync(async function (req, res, next) {
   });
 });
 
-exports.passwordRedefined = catchAsync(async (req, res, next) => {
+exports.changePassword = catchAsync(async (req, res, next) => {
   let user = undefined;
   try {
     user = await User.findByPk(req.params.username);
